@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Chat Now',
       home: FirebaseAuth.instance.currentUser != null
           ? Home(currentUser: FirebaseAuth.instance.currentUser!)
-          : LoginScreen(),
+          : const LoginScreen(),
     );
   }
 }
