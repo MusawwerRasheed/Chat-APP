@@ -1,9 +1,8 @@
 import 'package:chat_app/Application/Services/auth_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
- 
 
 class AuthRepository {
-  Future<User?> getUser() async {
+  Future getUser() async {
     try {
       return await Auth.googleSignin().then(
         (value) {

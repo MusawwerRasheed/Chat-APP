@@ -1,3 +1,4 @@
+import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class LoginStates {}
@@ -7,7 +8,7 @@ class LoginInitialState extends LoginStates {}
 class LoginLoadingState extends LoginStates {}
 
 class LoginLoadedState extends LoginStates {
-  User? user;
+  UserModel user ; 
   LoginLoadedState({required this.user});
 }
 

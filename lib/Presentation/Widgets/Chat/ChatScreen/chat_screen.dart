@@ -1,10 +1,17 @@
+import 'package:chat_app/Application/Services/firestore_services.dart';
+import 'package:chat_app/Data/Repository/chat_repository.dart';
+import 'package:chat_app/Domain/Models/chat_model.dart';
+import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+ 
 
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
-  final DocumentSnapshot otherUser;
+  final UserModel? otherUser;
 
   ChatScreen({Key? key, required this.chatRoomId, required this.otherUser})
       : super(key: key);
@@ -15,6 +22,33 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController inputController = TextEditingController();
+
+  late ValueNotifier<List<ChatModel>> chatMessagesNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    chatMessagesNotifier = ValueNotifier<List<ChatModel>>([]);
+    initChatStream();
+  }
+
+  void initChatStream() async {
+    try {
+ 
+      final chatStream = ChatRepository().getChat(widget.chatRoomId!);
+      chatStream.listen((chatMessages) {
+        chatMessagesNotifier.value = chatMessages;
+      });
+    } catch (e) {
+      print('Error initializing chat stream: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    chatMessagesNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +77,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Row(
             children: [
               Text(
-                widget.otherUser['displayName']!,
+                widget.otherUser!.displayName!,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(
@@ -56,7 +90,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   height: 40,
                   color: Colors.red,
                   child: Image.network(
-                    widget.otherUser['imageUrl'],
+                    widget.otherUser!.imageUrl!,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -69,50 +103,44 @@ class _ChatScreenState extends State<ChatScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('messages')
-                  .where('chatroomId', isEqualTo: widget.chatRoomId)
-                  .orderBy('timestamp', descending: true)
-                  .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                return ListView(
+            child: ValueListenableBuilder<List<ChatModel>>(
+              valueListenable: chatMessagesNotifier,
+              builder: (context, chatMessages, _) {
+                return ListView.builder(
                   reverse: true,
-                  children:
-                      snapshot.data!.docs.map((DocumentSnapshot document) {
-                    Map<String, dynamic> data =
-                        document.data() as Map<String, dynamic>;
+                  itemCount: chatMessages.length,
+                  itemBuilder: (context, index) {
+                    var message = chatMessages[index];
                     return ListTile(
                       title: Container(
-                          margin: data['uid'] == widget.otherUser.id
-                              ? EdgeInsets.only(right: 120)
-                              : EdgeInsets.only(left: 120),
-                          padding: EdgeInsets.only(left: 10, top: 8),
-                          height: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: data['uid'] == widget.otherUser.id
-                                ? Colors.blue
-                                : Color.fromARGB(255, 189, 185, 174),
+                        margin: message.senderId ==
+                                FirebaseAuth.instance.currentUser!.uid
+                            ? EdgeInsets.only(right: 120)
+                            : EdgeInsets.only(left: 120),
+                        padding: EdgeInsets.only(left: 10, top: 8),
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: message.senderId ==
+                                  FirebaseAuth.instance.currentUser!.uid
+                              ? Colors.blue
+                              : Color.fromARGB(255, 189, 185, 174),
+                        ),
+                        child: Text(
+                          message.text!,
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 31, 26, 26),
                           ),
-                          child: Text(
-                            data['text'],
-                            style: TextStyle(color: Colors.white),
-                          )),
+                        ),
+                      ),
                     );
-                  }).toList(),
+                  },
                 );
               },
             ),
           ),
+
+
           Row(
             children: [
               Expanded(
@@ -143,7 +171,7 @@ class _ChatScreenState extends State<ChatScreen> {
               GestureDetector(
                 onTap: () {
                   if (inputController.text.isNotEmpty) {
-                    sendMessage(inputController.text);
+                    sendMessage(inputController.text, widget.chatRoomId!);
                     inputController.clear();
                   }
                 },
@@ -168,17 +196,12 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void sendMessage(String messageText) {
-    try {
-      FirebaseFirestore.instance.collection('messages').add({
-        'uid': widget.otherUser.id,
-        'chatroomId': widget.chatRoomId,
-        'senderId': FirebaseAuth.instance.currentUser!.uid,
-        'text': messageText,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print("Error sending message: $e");
-    }
-  }
+
+
+  void sendMessage(String messageText, String chatRoomId) {
+   
+   FirestoreServices().sendMessage(chatRoomId, messageText); 
+
+ }
+
 }
