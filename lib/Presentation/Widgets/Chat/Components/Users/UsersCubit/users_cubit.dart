@@ -6,9 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UsersCubit extends Cubit<UsersState> {
   
-
-  List<DocumentSnapshot> _filteredUsers =[];
-  List<DocumentSnapshot> _users = []; 
+ 
 
   UsersCubit() : super(UsersInitialState());
 
@@ -17,6 +15,7 @@ class UsersCubit extends Cubit<UsersState> {
 
     try {
       List<UserModel> users = await UsersRepository().searchUsers(query);
+        
 
       emit(UsersLoadedState(users));
 

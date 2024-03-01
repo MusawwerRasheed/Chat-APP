@@ -1,14 +1,14 @@
 import 'package:chat_app/Application/Services/firestore_services.dart';
 import 'package:chat_app/Data/Repository/chat_repository.dart';
+import 'package:chat_app/Data/DataSource/Resources/color.dart';
+import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
  
-
+  
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final UserModel? otherUser;
@@ -23,12 +23,11 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController inputController = TextEditingController();
 
-  late ValueNotifier<List<ChatModel>> chatMessagesNotifier;
+   ValueNotifier<List<ChatModel>> chatMessagesNotifier = ValueNotifier<List<ChatModel>>([]) ;
 
   @override
   void initState() {
-    super.initState();
-    chatMessagesNotifier = ValueNotifier<List<ChatModel>>([]);
+    super.initState(); 
     initChatStream();
   }
 
@@ -53,9 +52,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 245, 243, 243),
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 245, 243, 243),
+        backgroundColor: AppColors.white,
         leading: GestureDetector(
           onTap: () {
             Navigator.of(context).pop();
@@ -64,7 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 238, 238, 238),
+                color:  AppColors.white,
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Icon(Icons.arrow_back),
@@ -78,8 +77,10 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Text(
                 widget.otherUser!.displayName!,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+
+                style: Styles.plusJakartaSans(context),
+               
+               ),
               const SizedBox(
                 width: 20,
               ),
@@ -88,7 +89,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Container(
                   width: 40,
                   height: 40,
-                  color: Colors.red,
+                  color: AppColors.blackColor,
                   child: Image.network(
                     widget.otherUser!.imageUrl!,
                     fit: BoxFit.cover,
@@ -112,24 +113,27 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (context, index) {
                     var message = chatMessages[index];
                     return ListTile(
-                      title: Container(
-                        margin: message.senderId ==
-                                FirebaseAuth.instance.currentUser!.uid
-                            ? EdgeInsets.only(right: 120)
-                            : EdgeInsets.only(left: 120),
-                        padding: EdgeInsets.only(left: 10, top: 8),
-                        height: 40,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: message.senderId ==
-                                  FirebaseAuth.instance.currentUser!.uid
-                              ? Colors.blue
-                              : Color.fromARGB(255, 189, 185, 174),
-                        ),
-                        child: Text(
-                          message.text!,
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 31, 26, 26),
+                      title: IntrinsicHeight(
+                        child: IntrinsicWidth(
+                          child: Container(
+                            
+                            margin: message.senderId ==
+                                    FirebaseAuth.instance.currentUser!.uid
+                                ? EdgeInsets.only(right: 120)
+                                : EdgeInsets.only(left: 120),
+                            padding: EdgeInsets.only(left: 10, top: 8),
+                             
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: message.senderId ==
+                                      FirebaseAuth.instance.currentUser!.uid
+                                  ? AppColors.blue
+                                  : AppColors.grey,
+                            ),
+                            child: Text(
+                              message.text!,
+                              style: Styles.plusJakartaSans(context, color: Colors.white, fontSize: 14.sp , fontWeight: FontWeight.w400, ),
+                            ),
                           ),
                         ),
                       ),
@@ -146,21 +150,21 @@ class _ChatScreenState extends State<ChatScreen> {
               Expanded(
                 child: Container(
                   margin: EdgeInsets.only(bottom: 20, left: 30),
-                  height: 40,
+                  height: 60, 
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: TextField(
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Message',
-                      hintStyle: const TextStyle(
+                      hintStyle: TextStyle(
                         fontSize: 15,
-                        color: Color.fromARGB(255, 8, 8, 8),
+                        color: Colors.black,
                       ),
                       prefixIcon: Icon(
                         Icons.face_outlined,
-                        color: Colors.grey[500],
+                        color: Colors.grey,
                       ),
                       border: InputBorder.none,
                     ),
@@ -177,15 +181,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
                 child: Container(
                   margin: EdgeInsets.only(bottom: 20, left: 10, right: 10),
-                  width: 50,
-                  height: 50,
+                  width: 50.w,
+                  height: 50.h,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
-                    color: Colors.blue,
+                    color: AppColors.blue,
+
                   ),
                   child: const Icon(
                     Icons.send,
-                    color: Colors.white,
+                    color: AppColors.white,
                   ),
                 ),
               ),

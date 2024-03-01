@@ -11,7 +11,7 @@ class LoginCubit extends Cubit<LoginStates> {
   Future<void> login() async {
     emit(LoginLoadingState());
     try {
-      UserModel? user = await AuthRepository().getUser();
+      UserModel? user = await AuthRepository.getUser();
       print('>>>>>>>> $user.displayName');
       emit(LoginLoadedState(user: user!));
     } catch (e) {

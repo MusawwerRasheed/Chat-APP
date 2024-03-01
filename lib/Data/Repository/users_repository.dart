@@ -1,14 +1,14 @@
-import 'package:chat_app/Application/Services/auth_services.dart';
-import 'package:chat_app/Application/Services/firestore_services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+ import 'package:chat_app/Application/Services/firestore_services.dart';
+ 
 
 class UsersRepository {
   Future searchUsers(String query) async {
     try {
       return await FirestoreServices().searchUsers(query).then(
         (value) {
+           
           return value;
+
         },
       ).catchError((e) {
         throw e;

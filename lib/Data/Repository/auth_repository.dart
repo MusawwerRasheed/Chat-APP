@@ -1,8 +1,10 @@
 import 'package:chat_app/Application/Services/auth_services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+ 
 
 class AuthRepository {
-  Future getUser() async {
+
+  
+static  Future getUser() async {
     try {
       return await Auth.googleSignin().then(
         (value) {
@@ -16,4 +18,39 @@ class AuthRepository {
       rethrow;
     }
   }
+
+
+static  Future loginWithEmail( Map<String,dynamic> loginCredentials) async {
+    try {
+      return await Auth.loginWithEmail(loginCredentials).then(
+        (value) {
+          return value;
+        },
+      ).catchError((e) {
+        throw e;
+      });
+    } catch (e) {
+      print('Error in auth repository $e');
+      rethrow;
+    }
+  }
+
+
+static  Future registerWithEmail(Map<String,dynamic> registerationData) async {
+    try {
+      return await Auth.registerWithEmail(registerationData).then(
+        (value) {
+          return value;
+        },
+      ).catchError((e) {
+        throw e;
+      });
+    } catch (e) {
+      print('Error in auth repository $e');
+      rethrow;
+    }
+  }
+
+
+
 }

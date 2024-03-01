@@ -1,24 +1,29 @@
+
+
 import 'package:chat_app/Application/Services/firestore_services.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatCubit/chat_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatCubit/chat_state.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
+import 'package:chat_app/Data/DataSource/Resources/color.dart';
+import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/ChatUsersCubit/chat_users.state.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/ChatUsersCubit/chat_users_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_state.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_quick_router/quick_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:chat_app/Data/Repository/DataSource/Resources/assets.dart';
+import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/login_screen.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_screen.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_state.dart';
+ 
 
+ 
 class Home extends StatefulWidget {
   final User? currentUser;
+  final BuildContext? context;
   final UserModel? userModel;
-  Home({Key? key, this.currentUser, this.userModel}) : super(key: key);
+  
+  Home({Key? key, this.context, this.currentUser, this.userModel}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -27,17 +32,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-
   final currentUser = FirebaseAuth.instance.currentUser;
-
   ValueNotifier<String> searchValueNotifier = ValueNotifier<String>('');
-
   TextEditingController userSearchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
     context.read<ChatUsersCubit>().getChatUsers();
   }
 
@@ -65,14 +66,14 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 208, 234, 255),
+      backgroundColor: AppColors.white,
       body: Column(
         children: [
           const SizedBox(height: 30),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(30.0),
+                padding: const EdgeInsets.all(30),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -81,21 +82,23 @@ class _HomeState extends State<Home> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(10.r),
                             ),
                             child: TextField(
                               onChanged: searchUsers,
                               controller: userSearchController,
                               decoration: InputDecoration(
-                                border: InputBorder.none,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30.0.r),
+                                ),
                                 prefixIcon: Image.asset(Assets.search!),
                                 hintText: 'Search',
-                                hintStyle: const TextStyle(color: Colors.grey),
+                                hintStyle: Styles.plusJakartaSans(context, color: AppColors.grey),
                                 suffixIcon: Image.asset(Assets.filter!),
-                                iconColor: Colors.grey,
-                                prefixIconColor: Colors.grey,
-                                suffixIconColor: Colors.blue,
+                                iconColor: AppColors.grey,
+                                prefixIconColor: AppColors.grey,
+                                suffixIconColor: AppColors.blue,
                               ),
                             ),
                           ),
@@ -106,24 +109,33 @@ class _HomeState extends State<Home> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(40),
                             child: Container(
-                              height: 40,
+                              height: 40.h,
                               width: 40,
-                              color: Colors.red,
-                              child: Image.network(widget
-                                      .currentUser?.photoURL ??
-                                  'https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?size=338&ext=jpg&ga=GA1.1.1700460183.1708387200&semt=ais'),
+                              color: AppColors.blackColor,
+                              child: widget.currentUser?.photoURL != null
+                                ? Image.network(widget.currentUser!.photoURL!)
+                                : Center(
+                                    child: Text(
+                                      _getInitials(widget.currentUser?.email ?? ""),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
                             ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Messages',
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: Styles.plusJakartaSans(
+                        context,
+                        fontSize: 20.h,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: AppColors.blackColor,
                       ),
                     ),
                     BlocConsumer<ChatUsersCubit, ChatUsersState>(
@@ -131,7 +143,7 @@ class _HomeState extends State<Home> {
                       builder: (context, state) {
                         if (state is ChatUsersLoadedState) {
                           return Container(
-                            height: 380,
+                            height: 380.h,
                             child: ListView.separated(
                               itemBuilder: (context, index) {
                                 final user = state.users[index];
@@ -139,82 +151,96 @@ class _HomeState extends State<Home> {
                                 return GestureDetector(
                                   onTap: () {
                                     FirestoreServices().checkChatroom(
-                                        context, currentUser!.uid, user!);
+                                      context, currentUser!.uid, user!
+                                    );
                                   },
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
+                                  child: Container(
+                                    height: 50.h,
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(30),
                                           child: Image.network(
                                             user.imageUrl!,
-                                            width: 40,
-                                            height: 40,
-                                          )),
-                                      const SizedBox(
-                                        width: 15,
-                                      ),
+                                            width: 40.w,
+                                            height: 40.h,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 15,
+                                        ),
+                                        SizedBox(
+                                          width: 160.w,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                user.displayName!,
+                                                style: Styles.plusJakartaSans(
+                                                  context,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.bold
+                                                ),
+                                              ),
+                                              Text(
+                                                'Latest Message'!,
+                                                style: Styles.plusJakartaSans(
+                                                  context,
+                                                  fontSize: 10.sp,
+                                                  fontWeight: FontWeight.w300,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 60,
+                                        ),
+                                        // Column(
+                                        //   children: [
+                                        //     Container(
+                                        //       height: 20.h,
+                                        //       width: 20.w,
+                                        //       decoration: BoxDecoration(
+                                        //         color: AppColors.blue,
+                                        //         borderRadius: BorderRadius.circular(40.r),
+                                        //       ),
+                                        //       child: Center(
+                                        //         child: Text(
+                                        //           '1',
+                                        //           style: Styles.plusJakartaSans(
+                                        //             context,fontSize: 12, 
+                                        //             color: AppColors.white, 
+                                        //           ),
+                                        //         ),
+                                        //       ),
+                                        //     ),
+                                        //     Text(
+                                        //       '10.00',
+                                        //       style: Styles.plusJakartaSans(
+                                        //         context,
+                                        //         fontSize: 12
+                                        //       ),
+                                        //     )
+                                        //   ],
+                                        // )
 
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            user.displayName!,
-                                            style: const TextStyle(
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Text(
-                                            'Latest Message'!,
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w300),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(
-                                        width: 60,
-                                      ),
-                                      Column(
-                                        children: [
-                                          Container(
-                                            height: 20,
-                                            width: 20,
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue,
-                                              borderRadius:
-                                                  BorderRadius.circular(40),
-                                            ),
-                                            child: const Center(
-                                                child: Text('1',
-                                                    style: TextStyle(
-                                                        color: Colors.white))),
-                                          ),
-                                          const Text(
-                                            '10.00',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                      // Your UI for each user
-                                    ],
+
+
+                                        
+                                      ],
+                                    ),
                                   ),
                                 );
                               },
-                              separatorBuilder:
-                                  (BuildContext context, int index) {
+                              separatorBuilder: (BuildContext context, int index) {
                                 return const SizedBox(height: 20);
                               },
-                              itemCount: state
-                                  .users.length, // Using state.users.length
+                              itemCount: state.users.length,
                             ),
                           );
                         } else {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: SizedBox(child: Text('No Messages yet'),));
                         }
                       },
                     ),
@@ -242,51 +268,73 @@ class _HomeState extends State<Home> {
   }
 
   void searchUsers(String value) {
-    
- print('inside seraching >>>>>>>>>>>>>>>>>>>>'); 
+    print('inside searching >>>>>>>>>>>>>>>>>>>>');
     searchValueNotifier.value = userSearchController.text;
-    context.read<UsersCubit>().getUsers(searchValueNotifier.value);
- 
+    context.read<UsersCubit>().getUsers(value);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           content: Container(
-            height: 200,
-            width: 200,
-            child: BlocBuilder<UsersCubit, UsersState>(
+            height: 200.h,
+            width: 200.w,
+            child: BlocConsumer<UsersCubit, UsersState>(
               builder: (context, state) {
                 if (state is UsersLoadedState) {
                   return ListView.builder(
                     itemCount: state.users.length,
                     itemBuilder: (context, index) {
-                      final user = state.users[index];
+                      final UserModel user = state.users[index];
+                     print(FirebaseAuth.instance.currentUser!.uid);
                       return GestureDetector(
-                         onTap: () {
-                                    FirestoreServices().checkChatroom(
-                                        context, currentUser!.uid, user);
-                                  },
+                        onTap: () {
+                          FirestoreServices().checkChatroom(context, FirebaseAuth.instance.currentUser!.uid , user);
+                        },
                         child: ListTile(
-                          title: Row(
-                            children: [
-                              ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: Image.network(
-                                    user.imageUrl!,
-                                    width: 30,
-                                    height: 30,
-                                  )),
-                              SizedBox(
-                                width: 6,
-                              ),
-                              Text(
-                                user.displayName ?? "",
-                                style: TextStyle(),
-                              ),
-                            ],
-                          ),
-                                             
-                        ),
+  title: Row(
+    children: [
+      user.imageUrl != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: Image.network(
+                user.imageUrl!,
+                width: 30.w,
+                height: 30.h,
+              ),
+            )
+          : Container(
+              width: 30.w,
+              height: 30.h,
+              decoration: BoxDecoration(
+                color: Colors.blue, // You can set any desired color
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Center(
+                child: Text(
+                  user.displayName != null && user.displayName!.isNotEmpty
+                      ? user.displayName![0].toUpperCase()
+                      : "",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+      const SizedBox(
+        width: 6,
+      ),
+      Text(
+        user.displayName ?? "",
+        style: TextStyle(),
+      ),
+    ],
+  ),
+),
+
+
                       );
                     },
                   );
@@ -294,10 +342,35 @@ class _HomeState extends State<Home> {
                   return const Center(child: CircularProgressIndicator());
                 }
               },
+              listener: (BuildContext context, UsersState state) {},
             ),
           ),
         );
       },
     );
   }
+
+  String _getInitials(String? email) {
+    if (email == null || email.isEmpty) {
+      return "";
+    }
+
+    List<String> nameSplit = email.split('@');
+    if (nameSplit.isEmpty) {
+      return "";
+    }
+
+    String initials = "";
+    List<String> parts = nameSplit[0].split(RegExp(r"\s+"));
+    if (parts.isNotEmpty) {
+      initials = parts[0][0].toUpperCase();
+      if (parts.length > 1) {
+        initials += parts[1][0].toUpperCase();
+      }
+    }
+    return initials;
+  }
 }
+
+
+
