@@ -15,4 +15,19 @@
     }
     return null;
   }
+
+
+
+static String? email(v) {
+    Pattern pattern =
+        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
+    RegExp regExp = RegExp(pattern.toString());
+    if (v.trim().isEmpty) {
+      return "Please provide email";
+    } else if (!regExp.hasMatch(v)) {
+      return 'Enter valid Email';
+    }
+    return null;
+  }
+
 }

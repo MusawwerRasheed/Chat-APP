@@ -9,9 +9,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'firebase_options.dart';
 
 void main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MultiBlocProvider(providers: appProviders, child: MyApp()));
+
 }
 
 class MyApp extends StatelessWidget {
@@ -30,10 +32,6 @@ builder: (context, build){
     Home(currentUser: FirebaseAuth.instance.currentUser!,):LoginScreen(), 
   );
 },
-
  );
-
-
-   
-  }
+   }
 }

@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // class ChatLoadedState extends ChatState {
 //   Stream<QuerySnapshot<Map<String, dynamic>>> chat;
 
-//   ChatLoadedState(this.chat);
+//   ChatLoadedState(this.chat);p
 // }
 
 // class ChatErrorState extends ChatState {

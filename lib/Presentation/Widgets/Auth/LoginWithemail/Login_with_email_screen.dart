@@ -35,9 +35,8 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
     final User? user = FirebaseAuth.instance.currentUser;
 
     if (FirebaseAuth.instance.currentUser != null) {
-      context.to(Home(
-        currentUser: user,
-      ));
+      context.pushReplacement(Home(currentUser: user,));
+     
     } else {
       AlertDialog(
         content: Container(
@@ -81,14 +80,24 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
               CustomTextField(
                 controller: _emailController,
                 label: 'Enter Email',
-                hintText: 'Email',
+                validateText: 'please enter email',
+                 validator: (value) {
+            if (value == null) {
+              return 'please enter email';
+            } else {
+              return null;
+            }
+          },
+        
+        
+                hintText: 'Email', isValid: null,
               ),
               const SizedBox(height: 16.0),
               CustomTextField(
                 controller: _passwordController,
                 label: 'Enter Password',
                 hintText: 'Password',
-                obscure: true,
+                obscure: true, isValid: null,
               ),
               const SizedBox(height: 16.0),
               CustomButton(

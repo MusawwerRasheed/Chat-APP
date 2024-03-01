@@ -6,11 +6,15 @@ class CustomTextField extends StatelessWidget {
   final String hintText;
   final bool? obscure;
   final String? Function(String?)? validator;
+  final bool? isValid;
+  final String? validateText;
 
   const CustomTextField({
     Key? key,
     this.obscure,
     this.validator,
+    this.validateText,
+    required this.isValid,
     required this.controller,
     required this.label,
     required this.hintText,
@@ -20,7 +24,12 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      validator: validator,
+      validator: (v) {
+        if (isValid == true && (v == null || v.trim().isEmpty)) {
+          return validateText;
+        }
+        return validator?.call(v);
+      },
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(40),

@@ -1,9 +1,6 @@
-import 'package:chat_app/Data/DataSource/Resources/assets.dart';
-import 'package:chat_app/Data/DataSource/Resources/styles.dart';
-import 'package:chat_app/Data/DataSource/Resources/validator.dart';
+import 'package:chat_app/Data/DataSource/Resources/assets.dart'; 
 import 'package:chat_app/Presentation/Common/custom_button.dart';
-import 'package:chat_app/Presentation/Common/custom_textfield.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_states.dart';
+import 'package:chat_app/Presentation/Common/custom_textfield.dart'; 
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_states.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
@@ -51,18 +48,17 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
             children: [
               const SizedBox(height: 20),
               CustomTextField(
-
-                // validator: ,
+ 
                 
                 controller: _fullNameController,
                 label: 'Enter Your name',
-                hintText: 'Full Name',
+                hintText: 'Full Name', isValid: null,
               ),
               const SizedBox(height: 16.0),
               CustomTextField(
                 controller: _emailController,
                 label: 'Enter Your Email',
-                hintText: 'email',
+                hintText: 'email', isValid: null,
                 
               ),
               const SizedBox(height: 16.0),
@@ -70,10 +66,8 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                 controller: _passwordController,
                 label: 'Enter Password',
                 hintText: 'Password',
-
-                // validator:   
-
-                obscure: true,
+  
+                obscure: true, isValid: null,
               ),
               const SizedBox(height: 24.0),
               CustomButton(buttonText: 'Register', buttonFunction: _register),
@@ -82,8 +76,10 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                   if (state is LoadedRegisterwithEmailState) {
                    
                     final userModel = state.user;
-                    context.to(Home(userModel: userModel, currentUser: FirebaseAuth.instance.currentUser,));
-                    print('Registration successful: $userModel');
+
+context.pushReplacement(Home(userModel: userModel, currentUser: FirebaseAuth.instance.currentUser,)); 
+
+                     print('Registration successful: $userModel');
                   } else if (state is ErrorRegisterWithEmailState) {
                     
                     print('Error occurred during registration');

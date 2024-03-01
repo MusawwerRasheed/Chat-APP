@@ -10,13 +10,15 @@ class ChatUsersCubit extends Cubit<ChatUsersState> {
 
   Future<void> getChatUsers() async {
     emit(ChatUsersInitialState());
-
+    
     try {
       List<UserModel> chatUsers = await UsersRepository().getChatUsers();
       emit(ChatUsersLoadedState(chatUsers));
+      
     } catch (e) {
       emit(ChatUsersErrorState(error: e.toString()));
       print('Error in ChatUsers cubit: $e');
     }
+  
   }
 }

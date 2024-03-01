@@ -99,6 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 );
+                
               } else if (state is LoginErrorState) {
                 setState(() {
                   _showError = true;

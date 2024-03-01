@@ -35,12 +35,10 @@ class FirestoreServices {
         if (data != null) {
           List<dynamic>? users = data['users'];
           if (users != null && users.isNotEmpty) {
-            // Filter out the current user's ID
             String otherUserId = users.firstWhere(
                 (userId) => userId != currentUser.uid,
                 orElse: () => '');
             if (otherUserId.isNotEmpty) {
-              // Check if a chat exists with this user
               var chatExists = querySnapshot.docs.any((chat) =>
                   (chat.data() as Map<String, dynamic>?)?['users']
                           ?.contains(currentUser.uid) ==
@@ -72,7 +70,9 @@ class FirestoreServices {
 
   Future<void> checkChatroom(
       BuildContext context, String userId, UserModel otherUser) async {
+
     try {
+
       List<String> users = [userId, otherUser.uid!];
 
       final QuerySnapshot chatroomsSnapshot = await FirebaseFirestore.instance
@@ -110,9 +110,6 @@ class FirestoreServices {
     }
   }
 
-
-
-
   Future<List<UserModel>> searchUsers(String query) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -133,14 +130,11 @@ class FirestoreServices {
     return users;
   }
 
-
-
-
   Future<void> createChatRoom(String userId, String otherUserId) async {
     try {
       String chatRoomId = generateChatRoomId(userId, otherUserId);
-
-      await FirebaseFirestore.instance
+  
+       await FirebaseFirestore.instance
           .collection('chatrooms')
           .doc(chatRoomId)
           .set({
@@ -154,17 +148,11 @@ class FirestoreServices {
     }
   }
 
-
-
-
   String generateChatRoomId(String userId, String otherUserId) {
     List<String> userIds = [userId, otherUserId];
     userIds.sort();
     return '${userIds[0]}_${userIds[1]}';
   }
-
-
-
 
   Future<void> updateChatRoomIdsForUsers(
       String userId, String otherUserId, String chatRoomId) async {
@@ -183,9 +171,6 @@ class FirestoreServices {
     }
   }
 
-
-
-
   Future<void> sendMessage(String chatRoomId, String messageText) async {
     try {
       FirebaseFirestore.instance.collection('messages').add(
@@ -200,11 +185,6 @@ class FirestoreServices {
       print("Error sending message: $e");
     }
   }
-
-
-
-
-
 
   Stream<List<ChatModel>> getChat(String chatRoomId) async* {
     try {
