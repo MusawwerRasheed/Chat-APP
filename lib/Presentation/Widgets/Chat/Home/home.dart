@@ -142,8 +142,13 @@ class _HomeState extends State<Home> {
                       listener: (context, state) {},
                       builder: (context, state) {
                         if (state is ChatUsersLoadedState) {
+<<<<<<< HEAD
                           return Container(
                             height: 380.h,
+=======
+                          return SizedBox(
+                            height: 380,
+>>>>>>> bb410cfab04688b8ed36a4be4ce28243e6bad463
                             child: ListView.separated(
                               itemBuilder: (context, index) {
                                 final user = state.users[index];
