@@ -1,32 +1,31 @@
-import 'package:chat_app/Application/Services/auth_exceptions.dart';
+ 
 import 'package:chat_app/Application/Services/firestore_services.dart';
-import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chat_app/Domain/Models/users_model.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/services.dart'; // Import PlatformException
+import 'package:google_sign_in/google_sign_in.dart'; 
+
 
 class Auth {
-
-
-  static FirebaseAuth _auth = FirebaseAuth.instance;
-
-  static Future<void> loginWithEmail(
-      Map<String, dynamic> logincredentials) async {
+ 
+  static Future loginWithEmail(
+       {required String email, required String password}
+       ) async {
+    print('inside login');
+    print('.>>>>>>>> >>>> >>>>>>>');
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: logincredentials['email'],
-        password: logincredentials['password'],
- ); 
-  print(FirebaseAuth.instance.currentUser.toString());
+     await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      
+      return FirebaseAuth.instance.currentUser;
+      
     } catch (e) {
       print("Error logging in: $e");
-      return null;
+       rethrow; 
     }
   }
-
-
-
 
 
 
@@ -37,7 +36,7 @@ class Auth {
       String password = registrationData['password'];
 
       UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -46,6 +45,7 @@ class Auth {
 
       UserModel userModel = UserModel(
         uid: userCredential.user!.uid,
+        email: userCredential.user!.email,
         displayName: userName,
         imageUrl: '',
       );
@@ -56,9 +56,6 @@ class Auth {
       return null;
     }
   }
-
-
-
 
   static Future<UserModel?> googleSignin() async {
     try {
@@ -93,46 +90,8 @@ class Auth {
       return null;
     }
   }
-
-  
 }
 
-
-
-
-
-
-
-
-// Future googleSignin() async {
-//   try {
-//     final FirebaseAuth auth = FirebaseAuth.instance;
-//     final GoogleSignIn gSignin = GoogleSignIn();
-//     final GoogleSignInAccount? googleSignInAccount = await gSignin.signIn();
-
-//     if (googleSignInAccount != null) {
-//       final GoogleSignInAuthentication googleSignInAuthentication =
-//           await googleSignInAccount.authentication;
-
-//       final AuthCredential credential = GoogleAuthProvider.credential(
-//         accessToken: googleSignInAuthentication.accessToken,
-//         idToken: googleSignInAuthentication.idToken,
-//       );
-
-//       final UserCredential authResult =
-//           await auth.signInWithCredential(credential);
-
-//       UserModel userModel = UserModel(
-//         uid: authResult.user?.uid,
-//         displayName: authResult.user?.displayName,
-//         imageUrl: authResult.user?.photoURL,
-//       );
-//       await FirestoreServices.storeUserdata(userModel);
-//       return userModel;
-//     }
-//   } catch (e) {
-//     return AuthExceptionHandler.handleException(e);
-//   }
 
 
 

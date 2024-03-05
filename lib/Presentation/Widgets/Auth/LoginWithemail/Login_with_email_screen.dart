@@ -1,12 +1,10 @@
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
-import 'package:chat_app/Data/DataSource/Resources/styles.dart';
+import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
 import 'package:chat_app/Presentation/Common/custom_textfield.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_states.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quick_router/quick_router.dart';
@@ -21,37 +19,6 @@ class LoginWithEmail extends StatefulWidget {
 class _LoginWithEmailState extends State<LoginWithEmail> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  void _loginWithEmail() {
-    String email = _emailController.text;
-    String password = _passwordController.text;
-    Map<String, dynamic> loginCredentials = {
-      'email': email,
-      'password': password
-    };
-
-    context.read<LoginWithEmailCubit>().loginWithEmail(loginCredentials);
-
-    final User? user = FirebaseAuth.instance.currentUser;
-
-    if (FirebaseAuth.instance.currentUser != null) {
-      context.pushReplacement(Home(currentUser: user,));
-     
-    } else {
-      AlertDialog(
-        content: Container(
-          height: 40,
-          child: const Center(
-            child: Text("No user selected"),
-          ),
-        ),
-        backgroundColor: Colors.red[300],
-      );
-    }
-
-    print('Email: $email');
-    print('Password: $password');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,35 +47,51 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
               CustomTextField(
                 controller: _emailController,
                 label: 'Enter Email',
-                validateText: 'please enter email',
-                 validator: (value) {
-            if (value == null) {
-              return 'please enter email';
-            } else {
-              return null;
-            }
-          },
-        
-        
-                hintText: 'Email', isValid: null,
+                hintText: 'Email',
               ),
               const SizedBox(height: 16.0),
               CustomTextField(
                 controller: _passwordController,
                 label: 'Enter Password',
                 hintText: 'Password',
-                obscure: true, isValid: null,
+                obscure: true,
               ),
               const SizedBox(height: 16.0),
               CustomButton(
                 buttonText: 'Login',
                 buttonFunction: _loginWithEmail,
               ),
+              BlocConsumer<LoginWithEmailCubit, LoginWithEmailState>(
+                 listener: ( context,   state) {
+
+                    if(state is LoadedLoginwithEmailState){
+                      context.to(Home());
+                    }
+                },
+                
+                builder: (context, state) {
+                  
+                   return SizedBox(); 
+                },
+               
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Validate validate = Validate();
+
+  void _loginWithEmail() {
+    if (validate.validateLogin(
+        context, _emailController.text, _passwordController.text)) {
+      String email = _emailController.text;
+      String password = _passwordController.text;
+      context.read<LoginWithEmailCubit>().loginWithEmail(email, password);
+       
+    }
   }
 
   @override

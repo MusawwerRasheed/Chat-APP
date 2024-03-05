@@ -3,7 +3,6 @@ import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/ChatUsersCubit/chat_users.state.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/ChatUsersCubit/chat_users_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_state.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_alert_dialog.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_image_avatar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
@@ -11,11 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_screen.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_cubit.dart';
+
+
 
 class Home extends StatefulWidget {
   final User? currentUser;
@@ -30,8 +29,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final currentUser = FirebaseAuth.instance.currentUser;
   ValueNotifier<String> searchValueNotifier = ValueNotifier<String>('');
   TextEditingController userSearchController = TextEditingController();
@@ -56,7 +53,7 @@ class _HomeState extends State<Home> {
       if (selectedValue != null) {
         switch (selectedValue) {
           case 'logout':
-            _signOut();
+            HomeController().signOut(context);
             break;
         }
       }
@@ -90,16 +87,15 @@ class _HomeState extends State<Home> {
                               controller: userSearchController,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30.0.r),
-                                ),
+                                    borderRadius: BorderRadius.circular(50)),
                                 prefixIcon: Image.asset(Assets.search!),
-                                hintText: 'Search',
-                                hintStyle: Styles.plusJakartaSans(context,
-                                    color: AppColors.grey),
-                                suffixIcon: Image.asset(Assets.filter!),
-                                iconColor: AppColors.grey,
+                                hintText: 'Search Users',
+                                hintStyle: Styles.plusJakartaSans(
+                                  context,
+                                  color: AppColors.grey,
+                                ),
                                 prefixIconColor: AppColors.grey,
-                                suffixIconColor: AppColors.blue,
+                                suffixIconColor: AppColors.grey,
                               ),
                             ),
                           ),
@@ -185,21 +181,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> _signOut() async {
-    try {
-      await _auth.signOut();
-      await _googleSignIn.signOut();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    } catch (error) {
-      print('Error signing out: $error');
-    }
-  }
-
   void searchUsers(String value) {
-    print('inside searching >>>>>>>>>>>>>>>>>>>>');
     searchValueNotifier.value = userSearchController.text;
     context.read<UsersCubit>().getUsers(value);
 
@@ -210,4 +192,13 @@ class _HomeState extends State<Home> {
       },
     );
   }
+
+@override
+void dispose(){
+  super.dispose(); 
 }
+
+}
+
+ 
+ 

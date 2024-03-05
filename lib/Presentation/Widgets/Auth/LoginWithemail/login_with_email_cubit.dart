@@ -6,11 +6,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class LoginWithEmailCubit extends Cubit<LoginWithEmailState> {
   LoginWithEmailCubit() : super(InitialLoginWithEmailState());
 
-  Future<void> loginWithEmail(Map<String, dynamic> loginCredentials) async {
+  Future loginWithEmail(String email, String password) async {
   
     try {
-       AuthRepository.loginWithEmail(loginCredentials);
- 
+       AuthRepository.loginWithEmail(email, password).then((value) => 
+       
+        (value !=null )? 
+        emit(LoadedLoginwithEmailState(value)):
+        emit(ErrorLoginWithEmailState())       
+              );
+
+        
     } catch (e) {
       print('Error in Login with Email Cubit $e');
     }

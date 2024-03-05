@@ -11,17 +11,20 @@ class CustomChatTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      decoration: const InputDecoration(
+        
+      decoration: InputDecoration(
         hintText: 'Message',
-        hintStyle: TextStyle(
+        hintStyle: const TextStyle(
           fontSize: 15,
           color: Colors.black,
         ),
-        prefixIcon: Icon(
+        prefixIcon: const Icon(
           Icons.face_outlined,
           color: Colors.grey,
         ),
-        border: InputBorder.none,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(45),
+        ),
       ),
       controller: inputController,
     );

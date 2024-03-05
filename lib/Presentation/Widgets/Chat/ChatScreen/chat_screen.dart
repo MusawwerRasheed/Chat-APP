@@ -15,8 +15,7 @@ class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final UserModel? otherUser;
 
-  const ChatScreen(
-      {Key? key, required this.chatRoomId, required this.otherUser})
+  const ChatScreen({Key? key, this.chatRoomId, this.otherUser})
       : super(key: key);
 
   @override
@@ -25,7 +24,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController inputController = TextEditingController();
-
+  ValueNotifier<bool> isStreamEmpty = ValueNotifier<bool>(false);
   ValueNotifier<List<ChatModel>> chatMessagesNotifier =
       ValueNotifier<List<ChatModel>>([]);
 
@@ -33,6 +32,8 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     initChatStream();
+
+    print(widget.chatRoomId);
   }
 
   void initChatStream() async {
@@ -40,6 +41,17 @@ class _ChatScreenState extends State<ChatScreen> {
       final chatStream = ChatRepository().getChat(widget.chatRoomId!);
       chatStream.listen((chatMessages) {
         chatMessagesNotifier.value = chatMessages;
+        print('?????>>>>');
+        print(chatMessagesNotifier.value);
+        print(isStreamEmpty.value);
+
+        if (chatMessagesNotifier.value.isEmpty) {
+          isStreamEmpty.value = true;
+          print(isStreamEmpty);
+        } else {
+          isStreamEmpty.value = false;
+          print(isStreamEmpty.value);
+        }
       });
     } catch (e) {
       print('Error initializing chat stream: $e');
@@ -125,7 +137,8 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
+        
         children: [
           Expanded(
             child: ValueListenableBuilder<List<ChatModel>>(
@@ -136,7 +149,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: chatMessages.length,
                   itemBuilder: (context, index) {
                     var message = chatMessages[index];
-                    return CustomListTIle(message: message);
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 10, bottom: 5),
+                      child: CustomListTile(message: message),
+                    );
                   },
                 );
               },
@@ -146,8 +162,8 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Expanded(
                 child: Container(
-                  // margin: EdgeInsets.only(bottom: 20, left: 30),
-                  height: 60,
+                  margin: EdgeInsets.only(left: 10, bottom: 20),
+                  height: 51.h,
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -158,8 +174,14 @@ class _ChatScreenState extends State<ChatScreen> {
               GestureDetector(
                 onTap: () {
                   if (inputController.text.isNotEmpty) {
-                    sendMessage(inputController.text, widget.chatRoomId!);
+                    FirestoreServices().sendMessage(
+                        widget.chatRoomId,
+                        inputController.text,
+                        widget.otherUser?.uid,
+                        context,
+                        isStreamEmpty.value);
                     context.read<ChatUsersCubit>().getChatUsers();
+                    initChatStream();
                     inputController.clear();
                   }
                 },
@@ -183,12 +205,4 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-
-  void sendMessage(String messageText, String chatRoomId) {
-    FirestoreServices().sendMessage(chatRoomId, messageText);
-  }
 }
-
-
-
-

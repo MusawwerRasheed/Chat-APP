@@ -20,9 +20,9 @@ static  Future getUser() async {
   }
 
 
-static  Future loginWithEmail( Map<String,dynamic> loginCredentials) async {
+static  Future loginWithEmail( String email, String password) async {
     try {
-      return await Auth.loginWithEmail(loginCredentials).then(
+      return await Auth.loginWithEmail(email: email, password: password).then(
         (value) {
           return value;
         },

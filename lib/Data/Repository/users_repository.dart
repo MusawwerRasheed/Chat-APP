@@ -23,7 +23,7 @@ class UsersRepository {
 
 Future getChatUsers() async {
     try {
-      return await FirestoreServices().GetChatusers().then(
+      return await FirestoreServices().getChatusers().then(
         (value) {
           return value;
         },

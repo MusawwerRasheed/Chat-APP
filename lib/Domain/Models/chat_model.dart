@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ChatModel {
     final String? chatroomId;
     final String? senderId;
@@ -39,7 +41,7 @@ class ChatModel {
         senderId: json["senderId"],
         text: json["text"],
         uid: json["uid"],
-        timestamp: json["timestamp"] == null ? null : DateTime.parse(json["timestamp"]),
+        timestamp: json["datetime"] == null ? null : DateTime.parse(json["datetime"]),
     );
 
     Map<String, dynamic> toJson() => {
@@ -47,6 +49,6 @@ class ChatModel {
         "senderId": senderId,
         "text": text,
         "uid": uid,
-        "timestamp": timestamp?.toIso8601String(),
+        "timestamp":  FieldValue.serverTimestamp(),
     };
 }

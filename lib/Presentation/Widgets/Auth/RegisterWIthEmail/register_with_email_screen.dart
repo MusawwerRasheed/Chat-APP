@@ -1,15 +1,14 @@
-import 'package:chat_app/Data/DataSource/Resources/assets.dart'; 
+import 'package:chat_app/Data/DataSource/Resources/assets.dart';
+import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
-import 'package:chat_app/Presentation/Common/custom_textfield.dart'; 
+import 'package:chat_app/Presentation/Common/custom_textfield.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_states.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_quick_router/quick_router.dart';
 
- 
 class RegisterWithEmail extends StatefulWidget {
   const RegisterWithEmail({Key? key}) : super(key: key);
 
@@ -30,15 +29,12 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
           decoration: BoxDecoration(
             image: DecorationImage(
               repeat: ImageRepeat.repeatY,
-              image: AssetImage(
-                Assets.logo!,
-              ),
               fit: BoxFit.contain,
+              image: AssetImage(Assets.logo!),
             ),
           ),
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -48,49 +44,47 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
             children: [
               const SizedBox(height: 20),
               CustomTextField(
- 
-                
                 controller: _fullNameController,
                 label: 'Enter Your name',
-                hintText: 'Full Name', isValid: null,
+                hintText: 'Full Name',
               ),
               const SizedBox(height: 16.0),
               CustomTextField(
                 controller: _emailController,
                 label: 'Enter Your Email',
-                hintText: 'email', isValid: null,
-                
+                hintText: 'email',
               ),
               const SizedBox(height: 16.0),
               CustomTextField(
                 controller: _passwordController,
                 label: 'Enter Password',
                 hintText: 'Password',
-  
-                obscure: true, isValid: null,
+                obscure: true,
               ),
               const SizedBox(height: 24.0),
               CustomButton(buttonText: 'Register', buttonFunction: _register),
               BlocConsumer<RegisterWithEmailCubit, RegisterWithEmailState>(
                 listener: (context, state) {
                   if (state is LoadedRegisterwithEmailState) {
-                   
                     final userModel = state.user;
-
-context.pushReplacement(Home(userModel: userModel, currentUser: FirebaseAuth.instance.currentUser,)); 
-
-                     print('Registration successful: $userModel');
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Home(
+                          userModel: userModel,
+                          currentUser: FirebaseAuth.instance.currentUser,
+                        ),
+                      ),
+                    );
+                    print('Registration successful: $userModel');
                   } else if (state is ErrorRegisterWithEmailState) {
-                    
                     print('Error occurred during registration');
                   }
                 },
                 builder: (context, state) {
                   if (state is InitialRegisterWithEmailState) {
-                 
                     // return CircularProgressIndicator();
                   }
-              
                   return Container();
                 },
               ),
@@ -101,21 +95,28 @@ context.pushReplacement(Home(userModel: userModel, currentUser: FirebaseAuth.ins
     );
   }
 
+  Validate validate = Validate();
+
   void _register() {
-    String fullName = _fullNameController.text;
-    String email = _emailController.text;
-    String password = _passwordController.text;
+    if (validate.validateSignUp(context, _fullNameController.text,
+        _emailController.text, _passwordController.text)) {
+      String fullName = _fullNameController.text;
+      String email = _emailController.text;
+      String password = _passwordController.text;
 
-    Map<String, dynamic> registrationData = {
-      'email': email,
-      'password': password,
-    };
+      Map<String, dynamic> registrationData = {
+        'email': email,
+        'password': password,
+      };
 
-    context.read<RegisterWithEmailCubit>().registerWithEmail(registrationData);
+      context
+          .read<RegisterWithEmailCubit>()
+          .registerWithEmail(registrationData);
 
-    print('Full Name: $fullName');
-    print('Email: $email');
-    print('Password: $password');
+      print('Full Name: $fullName');
+      print('Email: $email');
+      print('Password: $password');
+    }
   }
 
   @override
@@ -126,3 +127,5 @@ context.pushReplacement(Home(userModel: userModel, currentUser: FirebaseAuth.ins
     super.dispose();
   }
 }
+
+  
