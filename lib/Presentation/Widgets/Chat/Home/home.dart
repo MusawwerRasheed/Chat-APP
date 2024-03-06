@@ -1,4 +1,4 @@
-import 'package:chat_app/Application/Services/firestore_services.dart';
+import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/ChatUsersCubit/chat_users.state.dart';
@@ -13,8 +13,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_cubit.dart';
-
-
 
 class Home extends StatefulWidget {
   final User? currentUser;
@@ -36,6 +34,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    
     context.read<ChatUsersCubit>().getChatUsers();
   }
 
@@ -138,6 +137,8 @@ class _HomeState extends State<Home> {
                     ),
                     BlocConsumer<ChatUsersCubit, ChatUsersState>(
                       listener: (context, state) {
+                        print(state.toString());
+
                         if (state is ChatUsersLoadedState) {}
                       },
                       builder: (context, state) {
@@ -193,12 +194,10 @@ class _HomeState extends State<Home> {
     );
   }
 
-@override
-void dispose(){
-  super.dispose(); 
+  @override
+  void dispose() {
+    super.dispose();
+    searchValueNotifier.dispose();
+    userSearchController.dispose(); 
+  }
 }
-
-}
-
- 
- 

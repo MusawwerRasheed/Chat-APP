@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 
 class AuthExceptionHandler {
-  static String handleException(dynamic e) {
+  static String handleLoginException(dynamic e) {
     String errorText = '';
     if (e is FirebaseAuthException) {
       switch (e.code) {

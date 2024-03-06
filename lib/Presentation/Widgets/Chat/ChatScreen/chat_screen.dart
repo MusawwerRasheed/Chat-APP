@@ -1,4 +1,4 @@
-import 'package:chat_app/Application/Services/firestore_services.dart';
+import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/Repository/chat_repository.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';

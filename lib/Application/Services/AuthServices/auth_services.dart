@@ -1,33 +1,23 @@
- 
-import 'package:chat_app/Application/Services/firestore_services.dart';
-import 'package:chat_app/Domain/Models/users_model.dart'; 
+import 'package:chat_app/Application/Services/AuthServices/auth_exceptions.dart';
+import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
+import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart'; 
-
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Auth {
- 
   static Future loginWithEmail(
-       {required String email, required String password}
-       ) async {
-    print('inside login');
-    print('.>>>>>>>> >>>> >>>>>>>');
-    try {
-     await FirebaseAuth.instance.signInWithEmailAndPassword(
+      {required String email, required String password}) async {
+     try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      
       return FirebaseAuth.instance.currentUser;
-      
     } catch (e) {
-      print("Error logging in: $e");
-       rethrow; 
+      return AuthExceptionHandler.handleLoginException(e);
     }
   }
-
-
 
   static Future<UserModel?> registerWithEmail(
       Map<String, dynamic> registrationData) async {
@@ -39,6 +29,7 @@ class Auth {
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
+        
       );
 
       final userName = registrationData['email'].split('@').first;
@@ -91,8 +82,3 @@ class Auth {
     }
   }
 }
-
-
-
-
- 

@@ -5,12 +5,12 @@ class CustomTextField extends StatelessWidget {
   final String label;
   final String hintText;
   final bool? obscure;
-  
+  final String? Function(String?)? validatorValue;
 
   const CustomTextField({
     Key? key,
     this.obscure,
-    
+    this.validatorValue,
     required this.controller,
     required this.label,
     required this.hintText,
@@ -20,7 +20,7 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      
+      validator: validatorValue,
       decoration: InputDecoration(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(40),
@@ -31,11 +31,4 @@ class CustomTextField extends StatelessWidget {
       obscureText: obscure ?? false,
     );
   }
-
-
-
-
-
-
-
 }

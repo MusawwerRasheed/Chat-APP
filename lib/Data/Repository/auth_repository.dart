@@ -1,4 +1,4 @@
-import 'package:chat_app/Application/Services/auth_services.dart';
+import 'package:chat_app/Application/Services/AuthServices/auth_services.dart';
  
 
 class AuthRepository {

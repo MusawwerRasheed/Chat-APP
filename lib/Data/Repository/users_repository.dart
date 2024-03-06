@@ -1,4 +1,4 @@
- import 'package:chat_app/Application/Services/firestore_services.dart';
+ import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
  
 
 class UsersRepository {

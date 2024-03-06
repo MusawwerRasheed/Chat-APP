@@ -17,6 +17,7 @@ class RegisterWithEmail extends StatefulWidget {
 }
 
 class _RegisterWithEmailState extends State<RegisterWithEmail> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _fullNameController = TextEditingController();
@@ -38,57 +39,81 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              CustomTextField(
-                controller: _fullNameController,
-                label: 'Enter Your name',
-                hintText: 'Full Name',
-              ),
-              const SizedBox(height: 16.0),
-              CustomTextField(
-                controller: _emailController,
-                label: 'Enter Your Email',
-                hintText: 'email',
-              ),
-              const SizedBox(height: 16.0),
-              CustomTextField(
-                controller: _passwordController,
-                label: 'Enter Password',
-                hintText: 'Password',
-                obscure: true,
-              ),
-              const SizedBox(height: 24.0),
-              CustomButton(buttonText: 'Register', buttonFunction: _register),
-              BlocConsumer<RegisterWithEmailCubit, RegisterWithEmailState>(
-                listener: (context, state) {
-                  if (state is LoadedRegisterwithEmailState) {
-                    final userModel = state.user;
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Home(
-                          userModel: userModel,
-                          currentUser: FirebaseAuth.instance.currentUser,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                CustomTextField(
+                  validatorValue: (value) {
+                    if (value == '' || value!.isEmpty) {
+                      return 'please enter a value';
+                    }
+                  },
+                  controller: _fullNameController,
+                  label: 'Enter Your name',
+                  hintText: 'Full Name',
+                ),
+                const SizedBox(height: 16.0),
+                CustomTextField(
+                  validatorValue: (value) {
+                    if (value == '' || value!.isEmpty) {
+                      return 'please enter value ';
+                    }
+                    if (!Validate().isEmailValid(value)) {
+                      return 'please enter right format email';
+                    }
+                  },
+                  controller: _emailController,
+                  label: 'Enter Your Email',
+                  hintText: 'email',
+                ),
+                const SizedBox(height: 16.0),
+                CustomTextField(
+                  validatorValue: (value) {
+                    if (value == '' || value!.isEmpty) {
+                      return 'please enter value ';
+                    }
+                    if (value.length < 6) {
+                      return 'password must be 6 digts';
+                    }
+                  },
+                  controller: _passwordController,
+                  label: 'Enter Password',
+                  hintText: 'Password',
+                  obscure: true,
+                ),
+                const SizedBox(height: 24.0),
+                CustomButton(buttonText: 'Register', buttonFunction: _register),
+                BlocConsumer<RegisterWithEmailCubit, RegisterWithEmailState>(
+                  listener: (context, state) {
+                    if (state is LoadedRegisterwithEmailState) {
+                      final userModel = state.user;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Home(
+                            userModel: userModel,
+                            currentUser: FirebaseAuth.instance.currentUser,
+                          ),
                         ),
-                      ),
-                    );
-                    print('Registration successful: $userModel');
-                  } else if (state is ErrorRegisterWithEmailState) {
-                    print('Error occurred during registration');
-                  }
-                },
-                builder: (context, state) {
-                  if (state is InitialRegisterWithEmailState) {
-                    // return CircularProgressIndicator();
-                  }
-                  return Container();
-                },
-              ),
-            ],
+                      );
+                      print('Registration successful: $userModel');
+                    } else if (state is ErrorRegisterWithEmailState) {
+                      print('Error occurred during registration');
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is InitialRegisterWithEmailState) {
+                      // return CircularProgressIndicator();
+                    }
+                    return Container();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -98,8 +123,7 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
   Validate validate = Validate();
 
   void _register() {
-    if (validate.validateSignUp(context, _fullNameController.text,
-        _emailController.text, _passwordController.text)) {
+    if (_formKey.currentState!.validate()) {
       String fullName = _fullNameController.text;
       String email = _emailController.text;
       String password = _passwordController.text;
@@ -127,5 +151,3 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
     super.dispose();
   }
 }
-
-  

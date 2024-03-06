@@ -5,6 +5,10 @@ abstract class ChatUsersState {}
 
 class ChatUsersInitialState extends ChatUsersState {}
 
+
+class ChatUsersLoadingState extends ChatUsersState {}
+
+
 class ChatUsersLoadedState extends ChatUsersState {
   final List<UserModel> users;
   ChatUsersLoadedState(this.users);

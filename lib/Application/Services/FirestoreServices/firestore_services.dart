@@ -3,7 +3,6 @@ import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:flutter/material.dart';
 
 class FirestoreServices {
@@ -33,18 +32,18 @@ class FirestoreServices {
       print('inside get chat users ');
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('chatrooms')
-          .where('users', arrayContains: currentUser.uid)
+          .where('users', arrayContains: FirebaseAuth.instance.currentUser!.uid)
           .get();
-
+      print(querySnapshot.docs.length.toString());
+      print('>>>>>>>>>>>>>>');
       List<String> userIds = [];
-
       querySnapshot.docs.forEach((doc) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           List<dynamic>? users = data['users'];
           if (users != null && users.isNotEmpty) {
             String otherUserId = users.firstWhere(
-                (userId) => userId != currentUser.uid,
+                (userId) => userId != FirebaseAuth.instance.currentUser!.uid,
                 orElse: () => '');
             if (otherUserId.isNotEmpty) {
               var chatExists = querySnapshot.docs.any((chat) =>
@@ -70,12 +69,18 @@ class FirestoreServices {
       List<UserModel> users = usersQuerySnapshot.docs.map((user) {
         return UserModel.fromJson(user.data() as Map<String, dynamic>);
       }).toList();
+      print(users.length.toString());
       return users;
     } catch (e) {
       print('Error getting chat users: $e');
       throw e;
     }
   }
+
+
+
+
+  
 
   Future<void> checkChatroom(
       BuildContext context, String userId, UserModel otherUser) async {
@@ -181,50 +186,45 @@ class FirestoreServices {
     }
   }
 
-Future<void> sendMessage(String? chatRoomId, String? messageText, String? otherUserId, BuildContext? context, bool? isStreamEmpty) async {
-  print('inside the send message ????> >>> >> ');
-  print('Chat Room ID: $chatRoomId');
-  print('Is Stream Empty: $isStreamEmpty');
+  Future<void> sendMessage(String? chatRoomId, String? messageText,
+      String? otherUserId, BuildContext? context, bool? isStreamEmpty) async {
+    print('inside the send message ????> >>> >> ');
+    print('Chat Room ID: $chatRoomId');
+    print('Is Stream Empty: $isStreamEmpty');
 
-  try {
-    if (isStreamEmpty!) {
-      print('Stream is empty, creating new chat room...');
-      String chatroomid = await createChatRoom(currentUser.uid, otherUserId!);
-      print('New chatroom created with ID: $chatroomid');
+    try {
+      if (isStreamEmpty!) {
+        print('Stream is empty, creating new chat room...');
+        String chatroomid = await createChatRoom(currentUser.uid, otherUserId!);
+        print('New chatroom created with ID: $chatroomid');
 
-      FirebaseFirestore.instance.collection('messages').add(
-        ChatModel(
-          chatroomId: chatroomid,
-          senderId: FirebaseAuth.instance.currentUser!.uid,
-          text: messageText,
-          timestamp: DateTime.now(),
-          uid: otherUserId,
-        ).toJson(),
-      );
-      print('Message sent to new chat room.');
-    } else {
-      print('Stream is not empty, sending message to existing chat room...');
-      FirebaseFirestore.instance.collection('messages').add(
-        ChatModel(
-          chatroomId: chatRoomId,
-          senderId: FirebaseAuth.instance.currentUser!.uid,
-          text: messageText,
-          timestamp: DateTime.now(),
-          uid: otherUserId,
-        ).toJson(),
-      );
-      print('Message sent to existing chat room.');
+        FirebaseFirestore.instance.collection('messages').add(
+              ChatModel(
+                chatroomId: chatroomid,
+                senderId: FirebaseAuth.instance.currentUser!.uid,
+                text: messageText,
+                timestamp: DateTime.now(),
+                uid: otherUserId,
+              ).toJson(),
+            );
+        print('Message sent to new chat room.');
+      } else {
+        print('Stream is not empty, sending message to existing chat room...');
+        FirebaseFirestore.instance.collection('messages').add(
+              ChatModel(
+                chatroomId: chatRoomId,
+                senderId: FirebaseAuth.instance.currentUser!.uid,
+                text: messageText,
+                timestamp: DateTime.now(),
+                uid: otherUserId,
+              ).toJson(),
+            );
+        print('Message sent to existing chat room.');
+      }
+    } catch (e) {
+      print("Error sending message: $e");
     }
-  } catch (e) {
-    print("Error sending message: $e");
   }
-}
-
-   
-
-
-
-
 
   Stream<List<ChatModel>> getChat(String chatRoomId) async* {
     try {

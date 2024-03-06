@@ -1,3 +1,4 @@
+
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
@@ -19,6 +20,7 @@ class LoginWithEmail extends StatefulWidget {
 class _LoginWithEmailState extends State<LoginWithEmail> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -36,63 +38,80 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              CustomTextField(
-                controller: _emailController,
-                label: 'Enter Email',
-                hintText: 'Email',
-              ),
-              const SizedBox(height: 16.0),
-              CustomTextField(
-                controller: _passwordController,
-                label: 'Enter Password',
-                hintText: 'Password',
-                obscure: true,
-              ),
-              const SizedBox(height: 16.0),
-              CustomButton(
-                buttonText: 'Login',
-                buttonFunction: _loginWithEmail,
-              ),
-              BlocConsumer<LoginWithEmailCubit, LoginWithEmailState>(
-                 listener: ( context,   state) {
+      body: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                CustomTextField(
+                  validatorValue: (value) {
+                    if(value == '' || value!.isEmpty){
+                      return 'please enter a value';
+                    }
+                    if(!Validate().isEmailValid(value!)){
+                      return 'please enter correct email';
+                    }
+                    
+                  },
+                  controller: _emailController,
+                  label: 'Enter Email',
+                  hintText: 'Email',
+                ),
+                const SizedBox(height: 16.0),
+                CustomTextField(
+                  validatorValue: (value) {
+                    if(value!.isEmpty){
+                      return 'please enter a value '; 
+                    } 
 
-                    if(state is LoadedLoginwithEmailState){
+                    if(value.length < 6){
+                      return 'password should be greater than 6 digits';
+                    }
+                  },
+                  controller: _passwordController,
+                   
+                  label: 'Enter Password',
+                  hintText: 'Password',
+                  obscure: true,
+                ),
+                const SizedBox(height: 16.0),
+                CustomButton(
+                  buttonText: 'Login',
+                  buttonFunction: _loginWithEmail,
+                ),
+                BlocConsumer<LoginWithEmailCubit, LoginWithEmailState>(
+                  listener: (context, state) {
+                    if (state is LoadedLoginwithEmailState) {
                       context.to(Home());
                     }
-                },
-                
-                builder: (context, state) {
-                  
-                   return SizedBox(); 
-                },
-               
-              ),
-            ],
+                  },
+                  builder: (context, state) {
+                    return SizedBox();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Validate validate = Validate();
-
   void _loginWithEmail() {
-    if (validate.validateLogin(
-        context, _emailController.text, _passwordController.text)) {
+    if (_formKey.currentState!.validate()) {
       String email = _emailController.text;
       String password = _passwordController.text;
       context.read<LoginWithEmailCubit>().loginWithEmail(email, password);
-       
+      
     }
   }
+
+   
 
   @override
   void dispose() {

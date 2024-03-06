@@ -1,6 +1,5 @@
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_screen.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_alert_dialog.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -16,18 +15,13 @@ class HomeController {
     try {
       await _auth.signOut();
       await _googleSignIn.signOut();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context) => LoginScreen()), (route) => false);
     } catch (error) {
       print('Error signing out: $error');
     }
+    
   }
-
-  
-
-
+ 
 buildPopupMenu(BuildContext context) {
     showMenu(
       context: context,

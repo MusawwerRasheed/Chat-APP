@@ -1,4 +1,4 @@
-import 'package:chat_app/Application/Services/firestore_services.dart';
+import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_state.dart';
