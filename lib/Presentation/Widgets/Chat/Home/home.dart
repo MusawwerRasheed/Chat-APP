@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    
+
     context.read<ChatUsersCubit>().getChatUsers();
   }
 
@@ -137,7 +137,7 @@ class _HomeState extends State<Home> {
                     ),
                     BlocConsumer<ChatUsersCubit, ChatUsersState>(
                       listener: (context, state) {
-                        print(state.toString());
+                        // print(state.toString());
 
                         if (state is ChatUsersLoadedState) {}
                       },
@@ -148,7 +148,7 @@ class _HomeState extends State<Home> {
                             child: ListView.separated(
                               itemBuilder: (context, index) {
                                 final user = state.users[index];
-                                print(user.displayName!);
+                                // print(user.displayName!);
                                 return GestureDetector(
                                   onTap: () {
                                     FirestoreServices().checkChatroom(
