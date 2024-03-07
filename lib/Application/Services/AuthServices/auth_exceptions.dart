@@ -9,6 +9,8 @@ class AuthExceptionHandler {
         case 'user-not-found':
           errorText = 'No user found for provided credentials.';
           break;
+        case 'invalid-credential':
+          errorText = 'Incorrect email or password';
         case 'wrong-password':
           errorText = 'Wrong password provided for this user.';
           break;
@@ -26,5 +28,4 @@ class AuthExceptionHandler {
 
     return errorText;
   }
- 
 }

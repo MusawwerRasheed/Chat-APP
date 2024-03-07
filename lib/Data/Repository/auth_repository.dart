@@ -18,15 +18,12 @@ class AuthRepository {
 
   static Future loginWithEmail(String email, String password) async {
     try {
-      return await Auth.loginWithEmail(email: email, password: password).then(
-        (value) {
-          return value;
-        },
-      ).catchError((e) {
-        return e; 
+      return await Auth.loginWithEmail(email: email, password: password)
+          .then((value) {
+        return value;
       });
     } catch (e) {
-      print('Error in auth repository loginWithEmail $e');
+      print('123 Error in auth repository loginWithEmail $e');
       return e;
     }
   }
@@ -39,11 +36,11 @@ class AuthRepository {
           return value;
         },
       ).catchError((e) {
-        return e; 
+        return e;
       });
     } catch (e) {
       print('Error in auth repository registerwith email $e');
-      return e; 
+      return e;
     }
   }
 }

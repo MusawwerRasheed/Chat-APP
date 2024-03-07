@@ -14,15 +14,16 @@ class Result<T> {
 class Auth {
   static Future loginWithEmail(
       {required String email, required String password}) async {
-     try {
+    try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
+      print('<<<< SUCCESS');
       return FirebaseAuth.instance.currentUser;
     } catch (e) {
       return AuthExceptionHandler.handleLoginException(e);
+       
     }
   }
 
@@ -36,7 +37,6 @@ class Auth {
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
-        
       );
 
       final userName = registrationData['email'].split('@').first;
@@ -48,18 +48,14 @@ class Auth {
         imageUrl: '',
       );
       await FirestoreServices.storeUserdata(userModel);
-      return Result(userModel,null);
+      return Result(userModel, null);
     } catch (e) {
-     String authExceptions = AuthExceptionHandler.handleLoginException(e);
-     return Result(null, authExceptions);
+      String authExceptions = AuthExceptionHandler.handleLoginException(e).toString();
+      return Result(null, authExceptions);
     }
   }
 
-  
- 
- 
-
-static Future<UserModel?> googleSignin() async {
+  static Future<UserModel?> googleSignin() async {
     try {
       final FirebaseAuth auth = FirebaseAuth.instance;
       final GoogleSignIn gSignin = GoogleSignIn();
@@ -88,10 +84,8 @@ static Future<UserModel?> googleSignin() async {
         return null;
       }
     } catch (e) {
-      
-     String authError =  AuthExceptionHandler.handleLoginException(e);
-     throw(authError);
-     }
+      String authError = AuthExceptionHandler.handleLoginException(e);
+      throw (authError);
+    }
   }
- 
 }

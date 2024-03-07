@@ -7,18 +7,17 @@ class LoginWithEmailCubit extends Cubit<LoginWithEmailState> {
 
   Future loginWithEmail(String email, String password) async {
     try {
-      AuthRepository.loginWithEmail(email, password).then((value) =>
-          (value != null)
-              ? emit(LoadedLoginwithEmailState(value))
-              : emit(ErrorLoginWithEmailState('error in cubit')));
+      AuthRepository.loginWithEmail(email, password).then((value) {
+        if (value != null) {
+          emit(LoadedLoginwithEmailState(value));
+        }
+      });
     } catch (e) {
       print('Error in Login with Email Cubit $e');
+      print('>>>>>>>>>>>>>'); 
       emit(ErrorLoginWithEmailState(e.toString()));
     }
   }
 
-  @override
-  Future<void> close() {
-    return super.close();
-  }
+ 
 }
