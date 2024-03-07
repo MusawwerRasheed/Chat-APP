@@ -48,10 +48,10 @@ class Auth {
         imageUrl: '',
       );
       await FirestoreServices.storeUserdata(userModel);
-      return Result(userModel, null);
+      return Result(userModel,null);
     } catch (e) {
-      String authExceptions = AuthExceptionHandler.handleLoginException(e).toString();
-      return Result(null, authExceptions);
+     String authExceptions = AuthExceptionHandler.handleLoginException(e);
+     return Result(null, authExceptions);
     }
   }
 
