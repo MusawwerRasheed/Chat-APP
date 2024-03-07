@@ -1,4 +1,3 @@
-
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
@@ -6,6 +5,7 @@ import 'package:chat_app/Presentation/Common/custom_textfield.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_states.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quick_router/quick_router.dart';
@@ -50,13 +50,12 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                 const SizedBox(height: 20),
                 CustomTextField(
                   validatorValue: (value) {
-                    if(value == '' || value!.isEmpty){
+                    if (value == '' || value!.isEmpty) {
                       return 'please enter a value';
                     }
-                    if(!Validate().isEmailValid(value!)){
+                    if (!Validate().isEmailValid(value!)) {
                       return 'please enter correct email';
                     }
-                    
                   },
                   controller: _emailController,
                   label: 'Enter Email',
@@ -65,16 +64,15 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                 const SizedBox(height: 16.0),
                 CustomTextField(
                   validatorValue: (value) {
-                    if(value!.isEmpty){
-                      return 'please enter a value '; 
-                    } 
+                    if (value!.isEmpty) {
+                      return 'please enter a value ';
+                    }
 
-                    if(value.length < 6){
+                    if (value.length < 6) {
                       return 'password should be greater than 6 digits';
                     }
                   },
                   controller: _passwordController,
-                   
                   label: 'Enter Password',
                   hintText: 'Password',
                   obscure: true,
@@ -87,7 +85,10 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                 BlocConsumer<LoginWithEmailCubit, LoginWithEmailState>(
                   listener: (context, state) {
                     if (state is LoadedLoginwithEmailState) {
-                      context.to(Home());
+                      context.pushReplacement(Home(
+                        context: context,
+                        currentUser: FirebaseAuth.instance.currentUser,
+                      ));
                     }
                   },
                   builder: (context, state) {
@@ -107,11 +108,8 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
       String email = _emailController.text;
       String password = _passwordController.text;
       context.read<LoginWithEmailCubit>().loginWithEmail(email, password);
-      
     }
   }
-
-   
 
   @override
   void dispose() {

@@ -1,8 +1,8 @@
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/ChatUsersCubit/chat_users.state.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/ChatUsersCubit/chat_users_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users.state.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_alert_dialog.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_image_avatar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
@@ -12,7 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Components/Users/UsersCubit/users_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Users/UsersCubit/users_cubit.dart';
 
 class Home extends StatefulWidget {
   final User? currentUser;
