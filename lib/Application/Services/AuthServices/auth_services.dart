@@ -4,6 +4,13 @@ import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+class Result<T> {
+  final T? value;
+  final String? error;
+
+  Result(this.value, this.error);
+}
+
 class Auth {
   static Future loginWithEmail(
       {required String email, required String password}) async {
@@ -19,7 +26,7 @@ class Auth {
     }
   }
 
-  static Future<UserModel?> registerWithEmail(
+  static Future<Result<UserModel?>> registerWithEmail(
       Map<String, dynamic> registrationData) async {
     try {
       String email = registrationData['email'];
@@ -41,14 +48,18 @@ class Auth {
         imageUrl: '',
       );
       await FirestoreServices.storeUserdata(userModel);
-      return userModel;
+      return Result(userModel,null);
     } catch (e) {
-      print("Error registering user: $e");
-      return null;
+     String authExceptions = AuthExceptionHandler.handleLoginException(e);
+     return Result(null, authExceptions);
     }
   }
 
-  static Future<UserModel?> googleSignin() async {
+  
+ 
+ 
+
+static Future<UserModel?> googleSignin() async {
     try {
       final FirebaseAuth auth = FirebaseAuth.instance;
       final GoogleSignIn gSignin = GoogleSignIn();
@@ -77,8 +88,10 @@ class Auth {
         return null;
       }
     } catch (e) {
-      print("Error signing in with Google: $e");
-      return null;
-    }
+      
+     String authError =  AuthExceptionHandler.handleLoginException(e);
+     throw(authError);
+     }
   }
+ 
 }

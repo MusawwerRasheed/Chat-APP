@@ -10,7 +10,8 @@ class ChatUsersCubit extends Cubit<ChatUsersState> {
 
   Future<void> 
   getChatUsers() async {
- await Future.delayed(Duration.zero); 
+ await Future.delayed(Duration.zero);  
+ 
  emit(ChatUsersLoadingState()); 
     try {
       List<UserModel> chatUsers = await UsersRepository().getChatUsers();

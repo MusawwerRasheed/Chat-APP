@@ -6,16 +6,14 @@ class UsersRepository {
     try {
       return await FirestoreServices().searchUsers(query).then(
         (value) {
-           
-          return value;
-
+           return value;
         },
       ).catchError((e) {
-        throw e;
+        return e;
       });
     } catch (e) {
       print('Error in Users repository $e');
-      rethrow;
+      return e;
     }
   }
 

@@ -85,10 +85,22 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                 BlocConsumer<LoginWithEmailCubit, LoginWithEmailState>(
                   listener: (context, state) {
                     if (state is LoadedLoginwithEmailState) {
-                      context.pushReplacement(Home(
-                        context: context,
-                        currentUser: FirebaseAuth.instance.currentUser,
-                      ));
+                      print('>>>>> ????? >>>>>> Loaded state '); 
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Home(
+                            context: context,
+                            currentUser: FirebaseAuth.instance.currentUser,
+                          ),
+                        ),
+                        (Route<dynamic> route) => false,
+                      );
+                    }
+                    else if (state is ErrorLoginWithEmailState){
+
+                      print(">>>>>>>>>>>>>> ??? >>>>>  ERROR LOGGING IN"); 
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
                     }
                   },
                   builder: (context, state) {
@@ -103,14 +115,17 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
     );
   }
 
+ 
+
+
   void _loginWithEmail() {
     if (_formKey.currentState!.validate()) {
-      String email = _emailController.text;
-      String password = _passwordController.text;
-      context.read<LoginWithEmailCubit>().loginWithEmail(email, password);
+      
+      context.read<LoginWithEmailCubit>().loginWithEmail(_emailController.text, _passwordController.text);
     }
   }
 
+ 
   @override
   void dispose() {
     _emailController.dispose();

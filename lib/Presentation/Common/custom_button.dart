@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomButton extends StatelessWidget {
   final String buttonText;
   final VoidCallback? buttonFunction;
+  final Color? primaryColor;
+  final Color? onPrimaryColor;
+  final Color? borderSideColor;
 
   const CustomButton({
     Key? key,
+    this.borderSideColor,
+    this.primaryColor,
+    this.onPrimaryColor,
     required this.buttonText,
     required this.buttonFunction,
   }) : super(key: key);
@@ -15,15 +22,15 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: buttonFunction,
       style: ElevatedButton.styleFrom(
-        primary: Colors.blue, // Background color
-        onPrimary: Colors.white, // Text color
+        primary: primaryColor ?? Colors.blue,
+        onPrimary: onPrimaryColor ?? Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50.0), // Rounded corners
-          side: const BorderSide(color: Colors.blue), // Border color
+          borderRadius: BorderRadius.circular(50.0),
+          side: const BorderSide(color: Colors.blue),
         ),
         padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        textStyle: const TextStyle(
-          fontSize: 16,
+        textStyle: TextStyle(
+          fontSize: 16.sp,
           fontWeight: FontWeight.bold,
         ),
       ),

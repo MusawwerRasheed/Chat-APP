@@ -26,4 +26,5 @@ class AuthExceptionHandler {
 
     return errorText;
   }
+ 
 }

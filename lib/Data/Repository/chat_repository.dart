@@ -6,8 +6,8 @@ class ChatRepository {
     try {
       return FirestoreServices().getChat(chatRoomId);
     } catch (e) {
-      print('Error in Chat repository $e');
-      throw e;
+      print('Error in Chat repository  get chat $e');
+     throw e;  
     }
   }
 }

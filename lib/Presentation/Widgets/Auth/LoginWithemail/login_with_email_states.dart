@@ -12,4 +12,8 @@ class LoadedLoginwithEmailState extends LoginWithEmailState {
   );
 }
 
-class ErrorLoginWithEmailState extends LoginWithEmailState {}
+class ErrorLoginWithEmailState extends LoginWithEmailState {
+  String error;
+  ErrorLoginWithEmailState(this.error);
+
+}

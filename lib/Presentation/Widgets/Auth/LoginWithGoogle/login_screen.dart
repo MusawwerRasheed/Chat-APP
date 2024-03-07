@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Image.asset(
               Assets.logo!,
-              height: 200.h, // Adjust the height as needed
+              height: 200.h,  
             ),
             SizedBox(height: 20.h),
             Center(
@@ -42,8 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   context.read<LoginCubit>().login();
                 },
                 style: ElevatedButton.styleFrom(
-                  elevation: 2, // Adjust elevation as needed
-                  minimumSize: Size(200.w, 50.h), // Adjust size as needed
+                  elevation: 2,  
+                  minimumSize: Size(200.w, 50.h),  
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: CircularProgressIndicator(),
                 );
               }
-              return SizedBox.shrink();
+              return const SizedBox.shrink();
             },
           ),
           if (_showError)
@@ -126,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Center(
                 child: AlertDialog(
                   content: Container(
-                    height: 40,
+                    height: 40.h,
                     child: const Center(
                       child: Text("No user selected"),
                     ),
