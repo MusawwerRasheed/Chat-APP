@@ -12,11 +12,13 @@ void main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(MultiBlocProvider(providers: appProviders, child: MyApp()));
+  runApp(MultiBlocProvider(providers: appProviders, child: const MyApp()));
 
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
  return ScreenUtilInit(
@@ -29,7 +31,7 @@ builder: (context, build){
     debugShowCheckedModeBanner: false,
     title: 'Chat NOw',
     home: FirebaseAuth.instance.currentUser !=null? 
-    Home(currentUser: FirebaseAuth.instance.currentUser!,):LoginScreen(), 
+    Home(currentUser: FirebaseAuth.instance.currentUser!,):const LoginScreen(),
   );
 },
  );

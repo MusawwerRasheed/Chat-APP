@@ -49,7 +49,8 @@ class Auth {
       );
       await FirestoreServices.storeUserdata(userModel);
       return Result(userModel,null);
-    } catch (e) {
+    }
+    catch (e) {
      String authExceptions = AuthExceptionHandler.handleLoginException(e);
      return Result(null, authExceptions);
     }
