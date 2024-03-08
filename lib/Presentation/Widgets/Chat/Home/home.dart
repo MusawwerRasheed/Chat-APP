@@ -13,9 +13,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Users/UsersCubit/users_cubit.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+ 
 
 class Home extends StatefulWidget {
   final User? currentUser;
@@ -44,10 +46,13 @@ class _HomeState extends State<Home> {
   void _buildPopupMenu() {
     showMenu(
       context: context,
-      position: const RelativeRect.fromLTRB(100, 100, 0, 0),
+      position: RelativeRect.fromSize(
+        Rect.fromCircle(center: Offset.zero, radius: 100), // Update this as needed
+        Size(0, 0),
+      ),
       items: <PopupMenuEntry>[
         const PopupMenuItem(
-          child: CustomText(customText: 'logout '),
+          child: CustomText(customText: 'logout'),
           value: 'logout',
         ),
       ],
@@ -76,39 +81,36 @@ class _HomeState extends State<Home> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    BlocConsumer<ChatUsersCubit, ChatUsersState>(
+                      listener: (context, state) {},
+                      builder: (context, state) {
+                        if(state is ChatUsersLoadedState){
+                        return TypeAheadField<String>(
+                          itemBuilder: (context, suggestion) => ListTile(
+                            title: Text(suggestion),
+                          ),
+                          suggestionsCallback: (pattern) {
+                            List<String> matches = [];
+                            final chatUsersCubit = context.read<ChatUsersCubit>();
+                            for (var user in state.users) {
+                              if (user.displayName!.toLowerCase().startsWith(pattern.toLowerCase())) {
+                                matches.add(user.displayName!);
+                              }
+                            }
+                            return matches;
+                          }, onSelected: (String value) {  },
+                            
+                        );
+
+ }
+
+
+
+                 return Container();     },
+                    ),
+                    SizedBox(height: 10.h),
                     Row(
                       children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                            child: TextField(
-                              onChanged: searchUsers,
-                              controller: userSearchController,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(50)),
-                                prefixIcon: CustomImage(
-                                  isAssetImage: true,
-                                  imageUrl: Assets.search,
-                                  fit: BoxFit.scaleDown,
-                                  height: 1.h,
-                                  width: 1.w,
-                                ),
-                                hintText: 'Search Users',
-                                hintStyle: Styles.plusJakartaSans(
-                                  context,
-                                  color: AppColors.grey,
-                                ),
-                                prefixIconColor: AppColors.grey,
-                                suffixIconColor: AppColors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
                         GestureDetector(
                           onTap: _buildPopupMenu,
                           child: ClipRRect(
@@ -120,7 +122,7 @@ class _HomeState extends State<Home> {
                               child: widget.currentUser?.photoURL != null
                                   ? CustomImage(
                                       isAssetImage: false,
-                                      imageUrl: widget.currentUser!.photoURL,
+                                      imageUrl: widget.currentUser!.photoURL!,
                                     )
                                   : Center(
                                       child: CustomText(
@@ -159,25 +161,25 @@ class _HomeState extends State<Home> {
                             child: ListView.separated(
                               itemBuilder: (context, index) {
                                 final user = state.users[index];
-                                // print(user.displayName!);
                                 return GestureDetector(
                                   onTap: () {
                                     FirestoreServices().checkChatroom(
-                                        context, currentUser!.uid, user!);
+                                      context,
+                                      currentUser!.uid,
+                                      user,
+                                    );
                                   },
                                   child: CustomImageAvatar(user: user),
                                 );
                               },
-                              separatorBuilder:
-                                  (BuildContext context, int index) {
+                              separatorBuilder: (BuildContext context, int index) {
                                 return SizedBox(height: 20.h);
                               },
                               itemCount: state.users.length,
                             ),
                           );
                         } else {
-                          return const Center(
-                              child: CustomText(customText: 'No Messages Yet'));
+                          return const Center(child: CustomText(customText: 'No Messages Yet'));
                         }
                       },
                     ),
@@ -201,8 +203,6 @@ class _HomeState extends State<Home> {
         return CustomAlertDialog();
       },
     );
-
-    
   }
 
   @override
