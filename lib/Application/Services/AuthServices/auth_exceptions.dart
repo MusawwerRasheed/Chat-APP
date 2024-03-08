@@ -11,6 +11,7 @@ class AuthExceptionHandler {
           break;
         case 'invalid-credential':
           errorText = 'Incorrect email or password';
+          break; 
         case 'wrong-password':
           errorText = 'Wrong password provided for this user.';
           break;
@@ -29,3 +30,4 @@ class AuthExceptionHandler {
     return errorText;
   }
 }
+

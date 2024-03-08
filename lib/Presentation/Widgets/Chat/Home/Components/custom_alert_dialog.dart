@@ -1,11 +1,13 @@
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
+import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
+import 'package:chat_app/Presentation/Common/custom_image.dart';
+import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Users/UsersCubit/users_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Users/UsersCubit/users_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-  
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomAlertDialog extends StatelessWidget {
@@ -35,7 +37,7 @@ class CustomAlertDialog extends StatelessWidget {
                     child: ListTile(
                       title: Row(
                         children: [
-                          user.imageUrl ==  ''
+                          user.imageUrl == ''
                               ? Container(
                                   width: 30.w,
                                   height: 30.h,
@@ -44,41 +46,31 @@ class CustomAlertDialog extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(50),
                                   ),
                                   child: Center(
-                                    child: Text(
-                                      user.displayName != null &&
-                                              user.displayName!.isNotEmpty
-                                          ? user.displayName![0]
-                                              .toUpperCase()
-                                          : "",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      child: CustomText(
+                                    customText: user.displayName != null &&
+                                            user.displayName!.isNotEmpty
+                                        ? user.displayName![0].toUpperCase()
+                                        : "",
+                                    textStyle: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ),
+                                  )),
                                 )
                               : ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
-                                  child: Image.network(
-                                    user.imageUrl!,
+                                  child: CustomImage(
+                                    isAssetImage: false,
+                                    imageUrl: user.imageUrl!,
                                     width: 30.w,
                                     height: 30.h,
-                                  ),
-                                ),
-                          const SizedBox(
-                            width: 6,
-                          ),
-                          Text(
-                            user.displayName ?? "",
-                            style: TextStyle(),
-                          ),
+                                  )),
+                          6.x, 
+                          CustomText(customText: user.displayName ?? ''),
                         ],
                       ),
                     ),
-    
-    
-    
                   );
                 },
               );

@@ -1,3 +1,4 @@
+import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:flutter/material.dart';
 
 class UsersList extends StatefulWidget {
@@ -14,7 +15,7 @@ class _UsersListState extends State<UsersList> {
       body: Column(
         children: [
           Center(
-            child: Text('List of users'),
+            child: CustomText(customText: 'List of users'),
           )
         ],
       ),

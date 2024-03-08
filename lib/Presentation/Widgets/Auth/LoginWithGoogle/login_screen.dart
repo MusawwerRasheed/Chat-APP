@@ -1,4 +1,7 @@
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
+import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
+import 'package:chat_app/Presentation/Common/custom_image.dart';
+import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_state.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/Login_with_email_screen.dart';
@@ -25,32 +28,32 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Image.asset(
-            Assets.background!,
-            height: 800.h,
-            fit: BoxFit.fill,
+          const CustomImage(
+            isAssetImage: true,
           ),
           Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Image.asset(
-              Assets.logo!,
-              height: 200.h,  
+            CustomImage(
+              isAssetImage: true,
+              imageUrl: Assets.logo,
+              height: 200.h,
             ),
-            SizedBox(height: 20.h),
+            20.y,
             Center(
               child: ElevatedButton(
                 onPressed: () {
                   context.read<LoginCubit>().login();
                 },
                 style: ElevatedButton.styleFrom(
-                  elevation: 2,  
-                  minimumSize: Size(200.w, 50.h),  
+                  elevation: 2,
+                  minimumSize: Size(200.w, 50.h),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Sign in/up with  '),
-                    Image.asset(
-                      Assets.googlelogo!,
+                    CustomText(customText: 'Sin in/up with  '),
+                    CustomImage(
+                      imageUrl: Assets.googlelogo,
+                      isAssetImage: true,
                       height: 30.h,
                       width: 30.w,
                     ),
@@ -58,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 10.h),
+            10.y,
             Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -68,20 +71,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   elevation: 2, // Adjust elevation as needed
                   minimumSize: Size(200.w, 50.h), // Adjust size as needed
                 ),
-                child: Text('Sign up with Email'),
+                child: CustomText(customText: 'SIgn up with Email'),
               ),
             ),
-            SizedBox(height: 10.h),
+            10.y, 
             Center(
               child: ElevatedButton(
                 onPressed: () {
                   context.to(LoginWithEmail());
                 },
                 style: ElevatedButton.styleFrom(
-                  elevation: 2, // Adjust elevation as needed
-                  minimumSize: Size(200.w, 50.h), // Adjust size as needed
+                  elevation: 2,
+                  minimumSize: Size(200.w, 50.h),
                 ),
-                child: Text('Sign in with Email'),
+                child: CustomText(customText: 'Sign In With Email'),
               ),
             ),
           ]),
@@ -99,7 +102,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 );
-                
               } else if (state is LoginErrorState) {
                 setState(() {
                   _showError = true;
@@ -128,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   content: Container(
                     height: 40.h,
                     child: const Center(
-                      child: Text("No user selected"),
+                      child: CustomText(customText: 'No user selecetd'),
                     ),
                   ),
                   backgroundColor: Colors.white,

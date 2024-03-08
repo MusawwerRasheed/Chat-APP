@@ -1,11 +1,15 @@
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
-import 'package:chat_app/Data/Repository/chat_repository.dart';
+import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
+import 'package:chat_app/Data/Repository/ChatRepository/chat_repository.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
+import 'package:chat_app/Presentation/Common/custom_image.dart';
+import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Components/custom_chat_text_field.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Components/custom_list_tile.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_appbar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,77 +72,54 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Icon(Icons.arrow_back),
-            ),
-          ),
-        ),
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: SizedBox(
-          child: Row(
-            children: [
-              Text(
-                widget.otherUser!.displayName!,
-                style: Styles.plusJakartaSans(context),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              widget.otherUser!.imageUrl == ''
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(40),
-                      child: Container(
-                        color: Colors.blue[400],
-                        width: 40,
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            widget.otherUser!.displayName != null &&
+      appBar: CustomAppbar(widget:  Row(
+              children: [
+                CustomText(
+                  customText: widget.otherUser!.displayName!,
+                  textStyle: Styles.plusJakartaSans(context),
+                ),
+                20.x,
+                widget.otherUser!.imageUrl == ''
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(40),
+                        child: Container(
+                          color: Colors.blue[400],
+                          width: 40,
+                          height: 40,
+                          child: Center(
+                              child: CustomText(
+                            customText: widget.otherUser!.displayName != null &&
                                     widget.otherUser!.displayName!.isNotEmpty
                                 ? widget.otherUser!.displayName![0]
                                     .toUpperCase()
                                 : "",
-                            style: const TextStyle(
+                            textStyle: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
+                          )),
+                        ),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(40),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          color: AppColors.blackColor,
+                          child: CustomImage(
+                            isAssetImage: false,
+                            imageUrl: widget.otherUser!.imageUrl,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                      ),
-                    )
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(40),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        color: AppColors.blackColor,
-                        child: Image.network(
-                          widget.otherUser!.imageUrl!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    )
-            ],
-          ),
-        ),
+                      )
+              ],
+            ),
+      
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
-        
         children: [
           Expanded(
             child: ValueListenableBuilder<List<ChatModel>>(
@@ -206,3 +187,4 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+

@@ -5,6 +5,8 @@ abstract class LoginWithEmailState {}
 
 class InitialLoginWithEmailState extends LoginWithEmailState {}
 
+class LoadingLoginWithEmailState extends LoginWithEmailState {}
+
 class LoadedLoginwithEmailState extends LoginWithEmailState {
   final User? user;
   LoadedLoginwithEmailState(
@@ -15,5 +17,4 @@ class LoadedLoginwithEmailState extends LoginWithEmailState {
 class ErrorLoginWithEmailState extends LoginWithEmailState {
   String error;
   ErrorLoginWithEmailState(this.error);
-
 }

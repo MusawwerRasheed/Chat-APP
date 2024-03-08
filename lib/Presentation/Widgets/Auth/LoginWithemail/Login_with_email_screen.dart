@@ -1,14 +1,18 @@
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
+import 'package:chat_app/Data/DataSource/Resources/color.dart';
+import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
 import 'package:chat_app/Presentation/Common/custom_textfield.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_states.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_appbar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quick_router/quick_router.dart';
+import 'dart:async';
 
 class LoginWithEmail extends StatefulWidget {
   const LoginWithEmail({Key? key}) : super(key: key);
@@ -21,12 +25,13 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
+      appBar: CustomAppbar(
+        widget: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
               repeat: ImageRepeat.repeatY,
@@ -47,13 +52,13 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 CustomTextField(
                   validatorValue: (value) {
                     if (value == '' || value!.isEmpty) {
                       return 'please enter a value';
                     }
-                    if (!Validate().isEmailValid(value!)) {
+                    if (!Validate().isEmailValid(value)) {
                       return 'please enter correct email';
                     }
                   },
@@ -61,13 +66,12 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                   label: 'Enter Email',
                   hintText: 'Email',
                 ),
-                const SizedBox(height: 16.0),
+                SizedBox(height: 16),
                 CustomTextField(
                   validatorValue: (value) {
                     if (value!.isEmpty) {
                       return 'please enter a value ';
                     }
-
                     if (value.length < 6) {
                       return 'password should be greater than 6 digits';
                     }
@@ -77,7 +81,7 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                   hintText: 'Password',
                   obscure: true,
                 ),
-                const SizedBox(height: 16.0),
+                SizedBox(height: 16),
                 CustomButton(
                   buttonText: 'Login',
                   buttonFunction: _loginWithEmail,
@@ -85,25 +89,39 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
                 BlocConsumer<LoginWithEmailCubit, LoginWithEmailState>(
                   listener: (context, state) {
                     if (state is LoadedLoginwithEmailState) {
-                      print('>>>>> ????? >>>>>> Loaded state '); 
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Home(
-                            context: context,
-                            currentUser: FirebaseAuth.instance.currentUser,
+                      print('>>>>> ????? >>>>>> Loaded state');
+                      Timer(Duration(milliseconds: 100), () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Home(
+                              currentUser: FirebaseAuth.instance.currentUser,
+                            ),
                           ),
+                          (route) => false,
+                        );
+                      });
+                    } else if (state is ErrorLoginWithEmailState) {
+                      print(">>>>>>>>>>>>>> ??? >>>>>  ERROR LOGGING IN");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: AppColors.red,
+                          content: Text(state.error),
                         ),
-                        (Route<dynamic> route) => false,
                       );
-                    }
-                    else if (state is ErrorLoginWithEmailState){
-
-                      print(">>>>>>>>>>>>>> ??? >>>>>  ERROR LOGGING IN"); 
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
+                      // Set _isLoading back to false on error
+                      setState(() {
+                        _isLoading = false;
+                      });
                     }
                   },
                   builder: (context, state) {
+                    if (state is LoadingLoginWithEmailState) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top : 20.0),
+                        child: CircularProgressIndicator(),
+                      );
+                    }
                     return SizedBox();
                   },
                 ),
@@ -115,17 +133,19 @@ class _LoginWithEmailState extends State<LoginWithEmail> {
     );
   }
 
- 
-
+   
 
   void _loginWithEmail() {
     if (_formKey.currentState!.validate()) {
-      
-      context.read<LoginWithEmailCubit>().loginWithEmail(_emailController.text, _passwordController.text);
+      setState(() {
+        _isLoading = true;
+      });
+      context
+          .read<LoginWithEmailCubit>()
+          .loginWithEmail(_emailController.text, _passwordController.text);
     }
   }
 
- 
   @override
   void dispose() {
     _emailController.dispose();

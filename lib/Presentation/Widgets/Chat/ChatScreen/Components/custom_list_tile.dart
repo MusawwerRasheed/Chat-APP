@@ -1,6 +1,7 @@
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Domain/Models/chat_model.dart';
+import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,9 +41,9 @@ class CustomListTile extends StatelessWidget {
                 bottom: 10.sp,
                 right: 10,
               ),
-              child: Text(
-                message.text!,
-                style: Styles.plusJakartaSans(
+              child: CustomText(
+                customText: message.text!,
+                textStyle: Styles.plusJakartaSans(
                   context,
                   color: Colors.white,
                   fontSize: 14.sp,

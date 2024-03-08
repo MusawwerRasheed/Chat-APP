@@ -17,30 +17,19 @@ class AuthRepository {
   }
 
   static Future loginWithEmail(String email, String password) async {
-    try {
-      return await Auth.loginWithEmail(email: email, password: password)
-          .then((value) {
-        return value;
-      });
-    } catch (e) {
-      print('123 Error in auth repository loginWithEmail $e');
-      return e;
-    }
+    return await Auth.loginWithEmail(email: email, password: password)
+        .then((value) {
+      return value;
+    });
   }
+
 
   static Future registerWithEmail(
       Map<String, dynamic> registerationData) async {
-    try {
-      return await Auth.registerWithEmail(registerationData).then(
-        (value) {
-          return value;
-        },
-      ).catchError((e) {
-        return e;
-      });
-    } catch (e) {
-      print('Error in auth repository registerwith email $e');
-      return e;
-    }
+    return await Auth.registerWithEmail(registerationData).then(
+      (value) {
+ return value ; 
+      },
+    );
   }
 }

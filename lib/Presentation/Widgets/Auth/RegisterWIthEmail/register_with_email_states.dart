@@ -4,11 +4,16 @@ abstract class RegisterWithEmailState {}
 
 class InitialRegisterWithEmailState extends RegisterWithEmailState {}
 
-class LoadedRegisterwithEmailState extends RegisterWithEmailState {
- 
- UserModel user ;
- LoadedRegisterwithEmailState(this.user);
+class LoadingRegisterWithEmailState extends RegisterWithEmailState {}
 
+class LoadedRegisterwithEmailState extends RegisterWithEmailState {
+  UserModel user;
+  LoadedRegisterwithEmailState(this.user);
 }
 
-class ErrorRegisterWithEmailState extends RegisterWithEmailState {}
+class ErrorRegisterWithEmailState extends RegisterWithEmailState {
+final String? error; 
+ErrorRegisterWithEmailState(this.error);
+
+
+}

@@ -19,15 +19,16 @@ class Auth {
         email: email,
         password: password,
       );
-      print('<<<< SUCCESS');
+      print(FirebaseAuth.instance.currentUser);
       return FirebaseAuth.instance.currentUser;
     } catch (e) {
-      return AuthExceptionHandler.handleLoginException(e);
-       
+      print(AuthExceptionHandler.handleLoginException(e));
+      String error = AuthExceptionHandler.handleLoginException(e);
+      return error;
     }
   }
 
-  static Future<Result<UserModel?>> registerWithEmail(
+  static Future registerWithEmail(
       Map<String, dynamic> registrationData) async {
     try {
       String email = registrationData['email'];
@@ -48,12 +49,14 @@ class Auth {
         imageUrl: '',
       );
       await FirestoreServices.storeUserdata(userModel);
-      return Result(userModel,null);
+      return Result(userModel, null);
     } catch (e) {
-     String authExceptions = AuthExceptionHandler.handleLoginException(e);
-     return Result(null, authExceptions);
+      String authExceptions = AuthExceptionHandler.handleLoginException(e);
+      return authExceptions;
     }
   }
+
+
 
   static Future<UserModel?> googleSignin() async {
     try {

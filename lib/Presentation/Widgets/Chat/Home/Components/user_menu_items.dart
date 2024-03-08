@@ -1,4 +1,4 @@
- 
+import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:flutter/material.dart';
 
 class UserMenuItem extends StatelessWidget {
@@ -20,7 +20,7 @@ class UserMenuItem extends StatelessWidget {
         leading: CircleAvatar(
           backgroundImage: NetworkImage(photoUrl),
         ),
-        title: Text(displayName),
+        title: CustomText(customText: displayName),
       ),
     );
   }

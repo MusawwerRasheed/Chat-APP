@@ -1,13 +1,16 @@
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
+import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
 import 'package:chat_app/Presentation/Common/custom_textfield.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_states.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_appbar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quick_router/quick_router.dart';
 
 class RegisterWithEmail extends StatefulWidget {
   const RegisterWithEmail({Key? key}) : super(key: key);
@@ -25,8 +28,8 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
+      appBar: CustomAppbar(
+        widget: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
               repeat: ImageRepeat.repeatY,
@@ -45,7 +48,7 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+                20.y,
                 CustomTextField(
                   validatorValue: (value) {
                     if (value == '' || value!.isEmpty) {
@@ -56,7 +59,7 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                   label: 'Enter Your name',
                   hintText: 'Full Name',
                 ),
-                const SizedBox(height: 16.0),
+                16.y,
                 CustomTextField(
                   validatorValue: (value) {
                     if (value == '' || value!.isEmpty) {
@@ -70,7 +73,7 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                   label: 'Enter Your Email',
                   hintText: 'email',
                 ),
-                const SizedBox(height: 16.0),
+                16.y,
                 CustomTextField(
                   validatorValue: (value) {
                     if (value == '' || value!.isEmpty) {
@@ -85,30 +88,37 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                   hintText: 'Password',
                   obscure: true,
                 ),
-                const SizedBox(height: 24.0),
+                24.y,
                 CustomButton(buttonText: 'Register', buttonFunction: _register),
                 BlocConsumer<RegisterWithEmailCubit, RegisterWithEmailState>(
                   listener: (context, state) {
                     if (state is LoadedRegisterwithEmailState) {
                       final userModel = state.user;
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Home(
-                            userModel: userModel,
-                            currentUser: FirebaseAuth.instance.currentUser,
-                          ),
-                        ),
-                      );
+                      print('><><><><><><><><<<<><><>');
+                      print(userModel.displayName); 
+
+                      context.pushReplacement(Home(
+                        userModel: userModel,
+                        currentUser: FirebaseAuth.instance.currentUser,
+                      ));
                       print('Registration successful: $userModel');
-                    } else if (state is ErrorRegisterWithEmailState) {
-                      print('Error occurred during registration');
+                    } 
+                    else if (state is ErrorRegisterWithEmailState) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(state.error!)));
                     }
+                    
                   },
                   builder: (context, state) {
-                    if (state is InitialRegisterWithEmailState) {
-                      // return CircularProgressIndicator();
-                    }
+                    if (state is LoadingRegisterWithEmailState) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 20),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    } 
+
                     return Container();
                   },
                 ),

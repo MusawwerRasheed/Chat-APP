@@ -1,6 +1,9 @@
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
+import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
+import 'package:chat_app/Presentation/Common/custom_image.dart';
+import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users.state.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_alert_dialog.dart';
@@ -44,7 +47,7 @@ class _HomeState extends State<Home> {
       position: const RelativeRect.fromLTRB(100, 100, 0, 0),
       items: <PopupMenuEntry>[
         const PopupMenuItem(
-          child: Text('logout'),
+          child: CustomText(customText: 'logout '),
           value: 'logout',
         ),
       ],
@@ -65,7 +68,7 @@ class _HomeState extends State<Home> {
       backgroundColor: AppColors.white,
       body: Column(
         children: [
-          const SizedBox(height: 30),
+          30.y,
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -87,7 +90,13 @@ class _HomeState extends State<Home> {
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(50)),
-                                prefixIcon: Image.asset(Assets.search!),
+                                prefixIcon: CustomImage(
+                                  isAssetImage: true,
+                                  imageUrl: Assets.search,
+                                  fit: BoxFit.scaleDown,
+                                  height: 1.h,
+                                  width: 1.w,
+                                ),
                                 hintText: 'Search Users',
                                 hintStyle: Styles.plusJakartaSans(
                                   context,
@@ -99,22 +108,25 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        SizedBox(width: 10.w),
                         GestureDetector(
                           onTap: _buildPopupMenu,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
+                            borderRadius: BorderRadius.circular(40.r),
                             child: Container(
                               height: 40.h,
-                              width: 40,
+                              width: 40.w,
                               color: AppColors.blackColor,
                               child: widget.currentUser?.photoURL != null
-                                  ? Image.network(widget.currentUser!.photoURL!)
+                                  ? CustomImage(
+                                      isAssetImage: false,
+                                      imageUrl: widget.currentUser!.photoURL,
+                                    )
                                   : Center(
-                                      child: Text(
-                                        HomeController().getFirst(
+                                      child: CustomText(
+                                        customText: HomeController().getFirst(
                                             widget.currentUser?.email ?? 'A@'),
-                                        style: const TextStyle(
+                                        textStyle: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 18,
                                         ),
@@ -125,10 +137,10 @@ class _HomeState extends State<Home> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Messages',
-                      style: Styles.plusJakartaSans(
+                    20.y,
+                    CustomText(
+                      customText: 'Messages',
+                      textStyle: Styles.plusJakartaSans(
                         context,
                         fontSize: 20.h,
                         fontWeight: FontWeight.bold,
@@ -136,12 +148,11 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     BlocConsumer<ChatUsersCubit, ChatUsersState>(
-                      listener: (context, state) {
-                        // print(state.toString());
-
-                        if (state is ChatUsersLoadedState) {}
-                      },
+                      listener: (context, state) {},
                       builder: (context, state) {
+                        if (state is ChatUsersLoadingState) {
+                          return Center(child: const CircularProgressIndicator());
+                        }
                         if (state is ChatUsersLoadedState) {
                           return Container(
                             height: 500.h,
@@ -159,16 +170,14 @@ class _HomeState extends State<Home> {
                               },
                               separatorBuilder:
                                   (BuildContext context, int index) {
-                                return const SizedBox(height: 20);
+                                return SizedBox(height: 20.h);
                               },
                               itemCount: state.users.length,
                             ),
                           );
                         } else {
                           return const Center(
-                              child: SizedBox(
-                            child: Text('No Messages yet'),
-                          ));
+                              child: CustomText(customText: 'No Messages Yet'));
                         }
                       },
                     ),
@@ -192,12 +201,14 @@ class _HomeState extends State<Home> {
         return CustomAlertDialog();
       },
     );
+
+    
   }
 
   @override
   void dispose() {
     super.dispose();
     searchValueNotifier.dispose();
-    userSearchController.dispose(); 
+    userSearchController.dispose();
   }
 }
