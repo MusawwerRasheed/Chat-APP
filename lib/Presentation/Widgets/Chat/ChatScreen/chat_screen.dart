@@ -31,12 +31,12 @@ class _ChatScreenState extends State<ChatScreen> {
   ValueNotifier<bool> isStreamEmpty = ValueNotifier<bool>(false);
   ValueNotifier<List<ChatModel>> chatMessagesNotifier =
       ValueNotifier<List<ChatModel>>([]);
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     initChatStream();
-
     print(widget.chatRoomId);
   }
 
@@ -45,16 +45,10 @@ class _ChatScreenState extends State<ChatScreen> {
       final chatStream = ChatRepository().getChat(widget.chatRoomId!);
       chatStream.listen((chatMessages) {
         chatMessagesNotifier.value = chatMessages;
-        print('?????>>>>');
-        print(chatMessagesNotifier.value);
-        print(isStreamEmpty.value);
-
         if (chatMessagesNotifier.value.isEmpty) {
           isStreamEmpty.value = true;
-          print(isStreamEmpty);
         } else {
           isStreamEmpty.value = false;
-          print(isStreamEmpty.value);
         }
       });
     } catch (e) {
@@ -63,128 +57,173 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
-  void dispose() {
-    chatMessagesNotifier.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppbar(widget:  Row(
-              children: [
-                CustomText(
-                  customText: widget.otherUser!.displayName!,
-                  textStyle: Styles.plusJakartaSans(context),
-                ),
-                20.x,
-                widget.otherUser!.imageUrl == ''
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(40),
-                        child: Container(
-                          color: Colors.blue[400],
-                          width: 40,
-                          height: 40,
-                          child: Center(
-                              child: CustomText(
-                            customText: widget.otherUser!.displayName != null &&
-                                    widget.otherUser!.displayName!.isNotEmpty
-                                ? widget.otherUser!.displayName![0]
-                                    .toUpperCase()
-                                : "",
-                            textStyle: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )),
-                        ),
-                      )
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(40),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          color: AppColors.blackColor,
-                          child: CustomImage(
-                            isAssetImage: false,
-                            imageUrl: widget.otherUser!.imageUrl,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      )
-              ],
+      appBar: CustomAppbar(
+        widget: Row(
+          children: [
+            CustomText(
+              customText: widget.otherUser!.displayName!,
+              textStyle: Styles.plusJakartaSans(context),
             ),
-      
+            20.x,
+            widget.otherUser!.imageUrl == ''
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(40),
+                    child: Container(
+                      color: Colors.blue[400],
+                      width: 40,
+                      height: 40,
+                      child: Center(
+                          child: CustomText(
+                        customText: widget.otherUser!.displayName != null &&
+                                widget.otherUser!.displayName!.isNotEmpty
+                            ? widget.otherUser!.displayName![0].toUpperCase()
+                            : "",
+                        textStyle: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )),
+                    ),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(40),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      color: AppColors.blackColor,
+                      child: CustomImage(
+                        isAssetImage: false,
+                        imageUrl: widget.otherUser!.imageUrl,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  )
+          ],
+        ),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+      body: Stack(
         children: [
-          Expanded(
-            child: ValueListenableBuilder<List<ChatModel>>(
-              valueListenable: chatMessagesNotifier,
-              builder: (context, chatMessages, _) {
-                return ListView.builder(
-                  reverse: true,
-                  itemCount: chatMessages.length,
-                  itemBuilder: (context, index) {
-                    var message = chatMessages[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 10, bottom: 5),
-                      child: CustomListTile(message: message),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          Row(
+          
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(left: 10, bottom: 20),
-                  height: 51.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: CustomChatTextField(inputController: inputController),
+                child: ValueListenableBuilder<List<ChatModel>>(
+                  valueListenable: chatMessagesNotifier,
+                  builder: (context, chatMessages, _) {
+                    return ListView.builder(
+                      controller: scrollController,
+                      reverse: true,
+                      itemCount: chatMessages.length,
+                      itemBuilder: (context, index) {
+                        var message = chatMessages[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 10, bottom: 5),
+                          child: CustomListTile(message: message),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  if (inputController.text.isNotEmpty) {
-                    FirestoreServices().sendMessage(
-                        widget.chatRoomId,
-                        inputController.text,
-                        widget.otherUser?.uid,
-                        context,
-                        isStreamEmpty.value);
-                    context.read<ChatUsersCubit>().getChatUsers();
-                    initChatStream();
-                    inputController.clear();
-                  }
-                },
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 20, left: 10, right: 10),
-                  width: 50.w,
-                  height: 50.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: AppColors.blue,
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(left: 10, bottom: 20),
+                      height: 51.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child:
+                          CustomChatTextField(inputController: inputController),
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.send,
-                    color: AppColors.white,
+                  GestureDetector(
+                    onTap: () {
+                      if (inputController.text.isNotEmpty) {
+
+
+                        FirestoreServices().sendMessage(
+                          widget.chatRoomId,
+                          inputController.text,
+                          widget.otherUser?.uid,
+                          context,
+                          isStreamEmpty.value,
+                        );
+                        context.read<ChatUsersCubit>().getChatUsers();
+                        initChatStream();
+                        inputController.clear();
+                      }
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 20, left: 10, right: 10),
+                      width: 50.w,
+                      height: 50.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: AppColors.blue,
+                      ),
+                      child: const Icon(
+                        Icons.send,
+                        color: AppColors.white,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
+          ),
+          Positioned(
+            top: 500,
+            left: 280,
+            child: GestureDetector(
+              onTap: () {
+                _scrollToBottom();
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: const [
+                    BoxShadow(
+                      color: AppColors.blackColor,
+                      offset: Offset(2, 2),
+                      blurRadius: 1,
+                    )
+                  ],
+                  color: AppColors.lightGrey,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                height: 40,
+                width: 40,
+                child: const Icon(
+                  Icons.arrow_downward,
+                  color: AppColors.white,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
 
+  void _scrollToBottom() {
+    scrollController.animateTo(
+      scrollController.position.minScrollExtent,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOutQuint,
+    );
+  }
+
+  @override
+  void dispose() {
+    chatMessagesNotifier.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+}

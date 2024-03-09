@@ -9,13 +9,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
-  
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MultiBlocProvider(providers: appProviders, child: const MyApp()));
-
 }
 
 class MyApp extends StatelessWidget {
@@ -23,23 +20,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
- return ScreenUtilInit(
+    return ScreenUtilInit(
+      minTextAdapt: true,
+      splitScreenMode: true,
+      useInheritedMediaQuery: true,
+      builder: (context, build) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Chat Now',
+          home: 
+          // MyApp1(),
+          // MyHomePage(title: 'sldfjsldk',),
 
-minTextAdapt: true,
-splitScreenMode: true,
-useInheritedMediaQuery: true,
-builder: (context, build){
-  return MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'Chat Now',
-     home:
-      // MyHomePage(title: 'sldfjsldk',),
-
-     FirebaseAuth.instance.currentUser !=null? 
-    Home(currentUser: FirebaseAuth.instance.currentUser!,):const LoginScreen(),
-  
-  );
-},
- );
-   }
+           FirebaseAuth.instance.currentUser !=null?
+          Home(currentUser: FirebaseAuth.instance.currentUser!,):const LoginScreen(),
+        );
+      },
+    );
+  }
 }

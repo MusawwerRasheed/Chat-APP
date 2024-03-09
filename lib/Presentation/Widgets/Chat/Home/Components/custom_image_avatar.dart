@@ -7,78 +7,77 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomImageAvatar extends StatelessWidget {
+  final bool? isForSearch;
   const CustomImageAvatar({
     super.key,
     required this.user,
+    this.isForSearch,
   });
 
   final UserModel user;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 50.h,
-      child: Row(
-        children: [
-          user.imageUrl == ''
-              ? Container(
-                  width: 40.w,
-                  height: 40.h,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Center(
-                    child: CustomText(
-                      customText: user.displayName != null &&
-                              user.displayName!.isNotEmpty
-                          ? user.displayName![0].toUpperCase()
-                          : "",
-                      textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Row(
+      children: [
+         
+        user.imageUrl == ''
+            ? Container( 
+                width: isForSearch == true ? 30 : 40.w,
+                height: isForSearch == true ? 30 : 40.h,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Center(
+                  child: CustomText(
+                    customText: user.displayName != null &&
+                            user.displayName!.isNotEmpty
+                        ? user.displayName![0].toUpperCase()
+                        : "",
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: isForSearch == true ? 10 : 17,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                )
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: CustomImage(
-                    isAssetImage: false,
-                    imageUrl: user.imageUrl,
-                    width: 49.w,
-                    height: 40.h,
-                  ),
                 ),
-          15.x,
-          SizedBox(
-            width: 160.w,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  customText: user.displayName!,
-                  textStyle: Styles.plusJakartaSans(
-                    context,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
+              )
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: CustomImage(
+                  isAssetImage: false,
+                  imageUrl: user.imageUrl,
+                  width: isForSearch! ? 30 : 42.w,
+                  height: isForSearch == true ? 30 : 42.h,
                 ),
-                CustomText(
-                  customText: 'Latest Message'!,
-                  textStyle: Styles.plusJakartaSans(
-                    context,
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ],
+              ),
+        10.x,
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomText(
+              customText: user.displayName!,
+              textStyle: Styles.plusJakartaSans(
+                context,
+                fontSize: isForSearch == true ? 13 : 17,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          30.x,
-        ],
-      ),
+            isForSearch == false
+                ? CustomText(
+                    customText: 'Latest Message',
+                    textStyle: Styles.plusJakartaSans(
+                      context,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  )
+                : Container(),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -3,21 +3,20 @@ import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
-import 'package:chat_app/Presentation/Common/custom_text.dart';
+import 'package:chat_app/Presentation/Common/custom_text.dart'; 
 import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users.state.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_alert_dialog.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users_cubit.dart'; 
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_image_avatar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Users/UsersCubit/users_cubit.dart';
+import 'package:chat_app/Domain/Models/users_model.dart'; 
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
- 
+
+
 
 class Home extends StatefulWidget {
   final User? currentUser;
@@ -47,7 +46,8 @@ class _HomeState extends State<Home> {
     showMenu(
       context: context,
       position: RelativeRect.fromSize(
-        Rect.fromCircle(center: Offset.zero, radius: 100), // Update this as needed
+        Rect.fromCircle(
+            center: Offset.zero, radius: 100),  
         Size(0, 0),
       ),
       items: <PopupMenuEntry>[
@@ -84,29 +84,47 @@ class _HomeState extends State<Home> {
                     BlocConsumer<ChatUsersCubit, ChatUsersState>(
                       listener: (context, state) {},
                       builder: (context, state) {
-                        if(state is ChatUsersLoadedState){
-                        return TypeAheadField<String>(
-                          itemBuilder: (context, suggestion) => ListTile(
-                            title: Text(suggestion),
-                          ),
-                          suggestionsCallback: (pattern) {
-                            List<String> matches = [];
-                            final chatUsersCubit = context.read<ChatUsersCubit>();
-                            for (var user in state.users) {
-                              if (user.displayName!.toLowerCase().startsWith(pattern.toLowerCase())) {
-                                matches.add(user.displayName!);
+                        if (state is ChatUsersLoadedState) {
+                          return TypeAheadField(
+                            animationDuration: Duration(milliseconds: 200),
+                            debounceDuration: Duration(milliseconds: 500),
+                            itemBuilder: (context, suggestion) => ListTile(
+                              leading: SizedBox(
+                                width: 200,
+                                height: 100,
+                                child: CustomImageAvatar(isForSearch: true,
+                                  user: state.users.firstWhere(
+                                    (user) => user.displayName == suggestion,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            suggestionsCallback: (pattern) {
+                              List<String> matches = [];
+                              for (var user in state.users) {
+                                if (user.displayName!
+                                    .toLowerCase()
+                                    .startsWith(pattern.toLowerCase())) {
+                                  matches.add(user.displayName!);
+                                }
                               }
-                            }
-                            return matches;
-                          }, onSelected: (String value) {  },
-                            
-                        );
-
- }
-
-
-
-                 return Container();     },
+                              return matches;
+                            },
+                            onSelected: (String value) {
+                              var selectedUser = state.users.firstWhere(
+                                (user) => user.displayName == value,
+                              );
+                              if (selectedUser != null) {
+                                FirestoreServices().checkChatroom(
+                                    context,
+                                    FirebaseAuth.instance.currentUser!.uid,
+                                    selectedUser);
+                              }
+                            },
+                          );
+                        }
+                        return Container();
+                      },
                     ),
                     SizedBox(height: 10.h),
                     Row(
@@ -153,7 +171,8 @@ class _HomeState extends State<Home> {
                       listener: (context, state) {},
                       builder: (context, state) {
                         if (state is ChatUsersLoadingState) {
-                          return Center(child: const CircularProgressIndicator());
+                          return Center(
+                              child: const CircularProgressIndicator());
                         }
                         if (state is ChatUsersLoadedState) {
                           return Container(
@@ -169,17 +188,19 @@ class _HomeState extends State<Home> {
                                       user,
                                     );
                                   },
-                                  child: CustomImageAvatar(user: user),
+                                  child: CustomImageAvatar(user: user,  isForSearch: false, ),
                                 );
                               },
-                              separatorBuilder: (BuildContext context, int index) {
+                              separatorBuilder:
+                                  (BuildContext context, int index) {
                                 return SizedBox(height: 20.h);
                               },
                               itemCount: state.users.length,
                             ),
                           );
                         } else {
-                          return const Center(child: CustomText(customText: 'No Messages Yet'));
+                          return const Center(
+                              child: CustomText(customText: 'No Messages Yet'));
                         }
                       },
                     ),
@@ -190,18 +211,6 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-    );
-  }
-
-  void searchUsers(String value) {
-    searchValueNotifier.value = userSearchController.text;
-    context.read<UsersCubit>().getUsers(value);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CustomAlertDialog();
-      },
     );
   }
 

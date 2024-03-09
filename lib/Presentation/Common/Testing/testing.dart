@@ -1,61 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
- 
- 
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+void main() => runApp(MyApp1());
 
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  List<String> suggestions = [
-    "Apple",
-    "Banana",
-    "Cherry",
-    "Date",
-    "Elderberry",
-    "Fig",
-    "Grape",
-    "Honeydew",
-    "Mango",
-    "Nectarine",
-    "Orange",
-    "Peach",
-    "Pear",
-    "Quince",
-    "Raspberry",
-    "Strawberry",
-    "Tangerine",
-    "Watermelon",
-  ];
-
+class MyApp1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: TypeAheadField<String>(
-          // Ensure 'onSuggestionSelected' is included
-           
-          itemBuilder: (context, suggestion) => ListTile(
-            title: Text(suggestion),
-          ),
-          suggestionsCallback: (pattern) {
-            List<String> matches = [];
-            for (var item in suggestions) {
-              if (item.toLowerCase().startsWith(pattern.toLowerCase())) {
-                matches.add(item);
-              }
-            }
-            return matches;
-          }, onSelected: (String value) {  },
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Simple Positioned Example'),
+        ),
+        body: Stack(
+          children: [
+            Positioned(
+              top: 100,
+              left: 50,
+              child: Container(
+                width: 150,
+                height: 150,
+                color: Colors.blue,
+              ),
+            ),
+             
+          ],
         ),
       ),
     );
