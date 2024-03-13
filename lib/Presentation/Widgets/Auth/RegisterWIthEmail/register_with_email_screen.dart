@@ -94,20 +94,17 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                   listener: (context, state) {
                     if (state is LoadedRegisterwithEmailState) {
                       final userModel = state.user;
-                      print('><><><><><><><><<<<><><>');
-                      print(userModel.displayName); 
+                      print(userModel.displayName);
 
                       context.pushReplacement(Home(
                         userModel: userModel,
                         currentUser: FirebaseAuth.instance.currentUser,
                       ));
                       print('Registration successful: $userModel');
-                    } 
-                    else if (state is ErrorRegisterWithEmailState) {
+                    } else if (state is ErrorRegisterWithEmailState) {
                       ScaffoldMessenger.of(context)
                           .showSnackBar(SnackBar(content: Text(state.error!)));
                     }
-                    
                   },
                   builder: (context, state) {
                     if (state is LoadingRegisterWithEmailState) {
@@ -117,7 +114,7 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                           child: CircularProgressIndicator(),
                         ),
                       );
-                    } 
+                    }
 
                     return Container();
                   },

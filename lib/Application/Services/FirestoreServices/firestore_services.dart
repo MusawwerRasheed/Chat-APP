@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quick_router/quick_router.dart';
 
 class FirestoreServices {
   static final currentUser = FirebaseAuth.instance.currentUser!;
@@ -85,64 +88,6 @@ class FirestoreServices {
     }
   }
 
-//   Future<List<UserModel>> getChatusers() async {
-//     try {
-//       print('inside get chat users ');
-//       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-//           .collection('chatrooms')
-//           .where('users', arrayContains: FirebaseAuth.instance.currentUser!.uid)
-//           .get();
-
-//     print(querySnapshot);
-//       List<String> userIds = [];
-
-//       querySnapshot.docs.forEach((doc) {
-//         Map<String, dynamic>? chatroomData = doc.data() as Map<String, dynamic>?;
-//         if (chatroomData != null) {
-//           List<dynamic>? users = chatroomData['users'];
-
-//          print(users);
-//          //when i print here it prints 2
-//          print(users!.length);
-//           if (users != null && users.isNotEmpty) {
-//             String otherUsersIds = users.firstWhere(
-//                 (userId) => userId != FirebaseAuth.instance.currentUser!.uid,
-//                 orElse: () => '');
-//                 // print(otherUsersIds);
-//             if (otherUsersIds.isNotEmpty) {
-//               var chatExists = querySnapshot.docs.any((chat) =>
-//                   (chat.data() as Map<String, dynamic>?)?['users']
-//                           ?.contains(currentUser.uid) ==
-//                       true &&
-//                   (chat.data() as Map<String, dynamic>?)?['users']
-//                           ?.contains(otherUsersIds) ==
-//                       true);
-//               if (chatExists) {
-//                 userIds.add(otherUsersIds);
-//               }
-//             }
-//           }
-//         }
-//       });
-
-//       QuerySnapshot usersQuerySnapshot = await FirebaseFirestore.instance
-//           .collection('users')
-//           .where(FieldPath.documentId, whereIn: userIds)
-//           .get();
-// // when i print here it prints 1
-//       print(usersQuerySnapshot.docs.length);
-
-//       List<UserModel> users = usersQuerySnapshot.docs.map((user) {
-//         return UserModel.fromJson(user.data() as Map<String, dynamic>);
-//       }).toList();
-//       print(users.length.toString());
-//       return users;
-//     } catch (e) {
-//       print('Error getting chat users: $e');
-//       throw e;
-//     }
-//   }
-
   Future<void> checkChatroom(
       BuildContext context, String userId, UserModel otherUser) async {
     try {
@@ -169,13 +114,10 @@ class FirestoreServices {
 
       String chatRoomIds = generateChatRoomId(userId, otherUser.uid!);
       print('>>>>>>>>>>>>>>>>>>>>>>>>>>> $chatRoomId');
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              ChatScreen(chatRoomId: chatRoomIds, otherUser: otherUser),
-        ),
-      );
+      await context.to(ChatScreen(
+        chatRoomId: chatRoomIds,
+        otherUser: otherUser,
+      ));
     } catch (e, stackTrace) {
       print('Error in checkChatroom: $e');
       print(stackTrace);
@@ -183,6 +125,7 @@ class FirestoreServices {
   }
 
   Future<List<UserModel>> searchUsers(String query) async {
+    print('inside search users'); 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .where(
@@ -190,7 +133,6 @@ class FirestoreServices {
           isNotEqualTo: FirebaseAuth.instance.currentUser!.uid,
         )
         .get();
-    print('here');
 
     print(querySnapshot.docs.length);
     List<DocumentSnapshot> allUsers = querySnapshot.docs.toList();
@@ -251,10 +193,6 @@ class FirestoreServices {
 
   Future<void> sendMessage(String? chatRoomId, String? messageText,
       String? otherUserId, BuildContext? context, bool? isStreamEmpty) async {
-    print('inside the send message ????> >>> >> ');
-    print('Chat Room ID: $chatRoomId');
-    print('Is Stream Empty: $isStreamEmpty');
-
     try {
       if (isStreamEmpty!) {
         print('Stream is empty, creating new chat room...');
@@ -290,6 +228,28 @@ class FirestoreServices {
     }
   }
 
+  Stream<bool> isTyping(String userId) {
+    try {
+      return FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots()
+          .map((snapshot) {
+            print('>><<>><<>><<<>><<>><<');
+        if (snapshot.exists) {
+          print('good>>>>>>>>');
+          return snapshot.get('istyping') == true;
+        } else {
+          print('bad <<<<<<<<<<<<<<'); 
+          return false;
+        }
+      });
+    } catch (e) {
+      print('<><><> ERROR <><><><>< inside is typing');
+      throw e;
+    }
+  }
+
   Stream<List<ChatModel>> getChat(String chatRoomId) async* {
     try {
       final Stream<QuerySnapshot<Map<String, dynamic>>> chatsStream =
@@ -310,7 +270,6 @@ class FirestoreServices {
           } else if (timestamp is String) {
             timestamp = DateTime.tryParse(timestamp);
           } else {}
-
           return ChatModel.fromJson(data..['timestamp'] = timestamp.toString());
         }).toList();
         yield chats;

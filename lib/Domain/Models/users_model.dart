@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
  
+
 class UserModel {
   final String? displayName;
   final String? email;
   final String? imageUrl;
   final String? uid;
+  final bool? isTyping;
 
   UserModel({
     this.displayName,
     this.email,
     this.imageUrl,
     this.uid,
+    this.isTyping,
   });
 
   UserModel copyWith({
@@ -20,6 +22,7 @@ class UserModel {
     String? email,
     String? imageUrl,
     String? uid,
+     
   }) =>
       UserModel(
         displayName: displayName ?? this.displayName,
@@ -38,6 +41,7 @@ class UserModel {
         email: json["email"],
         imageUrl: json["imageUrl"],
         uid: json["uid"],
+
       );
 
   Map<String, dynamic> toJson() => {
@@ -45,6 +49,7 @@ class UserModel {
         "email": email,
         "imageUrl": imageUrl,
         "uid": uid,
+        "isTyping": isTyping, 
       };
 
   factory UserModel.fromSnapshot(DocumentSnapshot snapshot) {
@@ -53,6 +58,7 @@ class UserModel {
       displayName: data['displayName'] ?? "",
       imageUrl: data['imageUrl'] ?? "",
       uid: data['uid']??"", 
+      isTyping: data['isTyping']??false,
     );
   }
 }

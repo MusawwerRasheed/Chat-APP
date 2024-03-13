@@ -12,8 +12,6 @@ class LoadedRegisterwithEmailState extends RegisterWithEmailState {
 }
 
 class ErrorRegisterWithEmailState extends RegisterWithEmailState {
-final String? error; 
-ErrorRegisterWithEmailState(this.error);
-
-
+  final String? error;
+  ErrorRegisterWithEmailState(this.error);
 }

@@ -5,8 +5,12 @@ class CustomChatTextField extends StatelessWidget {
   final double? fontSize;
   final Color? inputColor;
   final Color? iconColor;
+  final void Function(String)? onChangedFunction;
+
   const CustomChatTextField(
-      {this.inputColor,
+    {
+      this.inputColor,
+      this.onChangedFunction, 
       this.fontSize,
       this.iconColor,
       this.hintTxt,
@@ -18,6 +22,7 @@ class CustomChatTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: onChangedFunction,
       decoration: InputDecoration(
         hintText: hintTxt ?? 'Message',
         hintStyle: TextStyle(
