@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
@@ -8,12 +7,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quick_router/quick_router.dart';
 
+
+
+
 class FirestoreServices {
   static final currentUser = FirebaseAuth.instance.currentUser!;
-
   static Future<QuerySnapshot<Map<String, dynamic>>> globalchatroomsSnapshot =
       FirebaseFirestore.instance.collection('chatrooms').get();
-
   static Future<void> storeUserdata(UserModel? userModel) async {
     try {
       if (userModel != null) {
@@ -125,7 +125,7 @@ class FirestoreServices {
   }
 
   Future<List<UserModel>> searchUsers(String query) async {
-    print('inside search users'); 
+    print('inside search users');
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .where(
@@ -228,28 +228,32 @@ class FirestoreServices {
     }
   }
 
-  Stream<bool> isTyping(String userId) {
+
+
+
+
+  Stream<bool> isTyping(String userId, bool typingStatus) {
     try {
-      return FirebaseFirestore.instance
+      print('inside isTyping services');
+      FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
-          .snapshots()
-          .map((snapshot) {
-            print('>><<>><<>><<<>><<>><<');
-        if (snapshot.exists) {
-          print('good>>>>>>>>');
-          return snapshot.get('istyping') == true;
-        } else {
-          print('bad <<<<<<<<<<<<<<'); 
-          return false;
-        }
+          .update({'isTyping': typingStatus}).then((_) {
+        print('isTyping status updated successfully');
+      }).catchError((error) {
+        print('Failed to update isTyping status: $error');
       });
+      return Stream<bool>.value(typingStatus);
     } catch (e) {
       print('<><><> ERROR <><><><>< inside is typing');
       throw e;
     }
   }
 
+
+
+
+ 
   Stream<List<ChatModel>> getChat(String chatRoomId) async* {
     try {
       final Stream<QuerySnapshot<Map<String, dynamic>>> chatsStream =
@@ -279,4 +283,7 @@ class FirestoreServices {
       throw e;
     }
   }
+
+
+  
 }

@@ -25,26 +25,34 @@ class HomeController {
     }
   }
 
-  buildPopupMenu(BuildContext context) {
-    showMenu(
-      context: context,
-      position: const RelativeRect.fromLTRB(100, 100, 0, 0),
-      items: <PopupMenuEntry>[
-        const PopupMenuItem(
-          child: CustomText(
-            customText: 'Logout',
-          ),
-          value: 'logout',
-        ),
-      ],
-    ).then((selectedValue) {
-      if (selectedValue != null) {
-        switch (selectedValue) {
-          case 'logout':
-            HomeController().signOut(context);
-            break;
-        }
-      }
-    });
-  }
+
+  // buildPopupMenu(BuildContext context) {
+  //   showMenu(
+  //     context: context,
+  //     position: RelativeRect.fromDirectional(
+  //         textDirection: TextDirection.ltr,
+  //         start: 10,
+  //         top: 90,
+  //         end: 200,
+  //         bottom: 30),
+  //     items: <PopupMenuEntry>[
+  //       const PopupMenuItem(
+  //         child: CustomText(
+  //           customText: 'Logout',
+  //         ),
+  //         value: 'logout',
+  //       ),
+  //     ],
+  //   ).then((selectedValue) {
+  //     if (selectedValue != null) {
+  //       switch (selectedValue) {
+  //         case 'logout':
+  //           HomeController().signOut(context);
+  //           break;
+  //       }
+  //     }
+  //   });
+  // }
+
+  
 }

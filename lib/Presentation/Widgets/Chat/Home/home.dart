@@ -13,8 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
+ 
 class Home extends StatefulWidget {
   final User? currentUser;
   final UserModel? userModel;
@@ -36,17 +38,19 @@ class _HomeState extends State<Home> {
     currentUser = FirebaseAuth.instance.currentUser;
     searchValueNotifier = ValueNotifier<String>('');
     userSearchController = TextEditingController();
-
     context.read<ChatUsersCubit>().getChatUsers();
   }
 
-  void _buildPopupMenu() {
+ 
+  buildPopupMenu() {
     showMenu(
       context: context,
-      position: RelativeRect.fromSize(
-        Rect.fromCircle(center: Offset.zero, radius: 200),
-        const Size(300, 20),
-      ),
+      position: RelativeRect.fromDirectional(
+          textDirection: TextDirection.ltr,
+          start: 200,
+          top: 100,
+          end: 50,
+          bottom: 50),
       items: <PopupMenuEntry>[
         const PopupMenuItem(
           child: CustomText(customText: 'logout'),
@@ -63,7 +67,6 @@ class _HomeState extends State<Home> {
       }
     });
   }
-
 
 
 
@@ -141,15 +144,16 @@ class _HomeState extends State<Home> {
                               );
                             } else {
                               context.read<UsersCubit>().getUsers("");
-                              return const SizedBox(
-                                  width: 60,
-                                  child: CircularProgressIndicator());
+                              return  SizedBox(
+                                  width: 230.w,
+                                  
+                                  child: Text('loading... '));
                             }
                           },
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 40),
                         GestureDetector(
-                          onTap: _buildPopupMenu,
+                          onTap: buildPopupMenu,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(40),
                             child: Container(

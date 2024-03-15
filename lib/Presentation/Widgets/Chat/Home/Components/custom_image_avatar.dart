@@ -20,9 +20,8 @@ class CustomImageAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-         
         user.imageUrl == ''
-            ? Container( 
+            ? Container(
                 width: isForSearch == true ? 30 : 40.w,
                 height: isForSearch == true ? 30 : 40.h,
                 decoration: BoxDecoration(
@@ -31,10 +30,10 @@ class CustomImageAvatar extends StatelessWidget {
                 ),
                 child: Center(
                   child: CustomText(
-                    customText: user.displayName != null &&
-                            user.displayName!.isNotEmpty
-                        ? user.displayName![0].toUpperCase()
-                        : "",
+                    customText:
+                        user.displayName != null && user.displayName!.isNotEmpty
+                            ? user.displayName![0].toUpperCase()
+                            : "",
                     textStyle: TextStyle(
                       color: Colors.white,
                       fontSize: isForSearch == true ? 10 : 17,
@@ -55,7 +54,7 @@ class CustomImageAvatar extends StatelessWidget {
         10.x,
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomText(
               customText: user.displayName!,
@@ -67,7 +66,7 @@ class CustomImageAvatar extends StatelessWidget {
             ),
             isForSearch == false
                 ? CustomText(
-                    customText: 'Latest Message',
+                    customText: '',
                     textStyle: Styles.plusJakartaSans(
                       context,
                       fontSize: 10.sp,

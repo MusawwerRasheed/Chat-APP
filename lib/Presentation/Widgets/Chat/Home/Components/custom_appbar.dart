@@ -40,10 +40,11 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
           ),
       automaticallyImplyLeading: autoImply ?? false,
       centerTitle: titleCentered ?? true,
-      title: SizedBox(child: widget),
+      title: SizedBox(
+        child: widget),
     );
   }
-
+ 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }

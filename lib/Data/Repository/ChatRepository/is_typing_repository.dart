@@ -3,12 +3,16 @@ import 'package:chat_app/Application/Services/FirestoreServices/firestore_servic
 class IsTypingRepository {
   IsTypingRepository();
 
-  Stream<bool> listenTyping(String userId) {
+  Stream<bool> listenTyping(String userId, bool istyping ) {
     try {
-      return FirestoreServices().isTyping(userId);
+    
+      
+      return FirestoreServices().isTyping(userId, istyping);
     } catch (e) {
       print('Error in istyping repository   $e');
       throw e;
     }
   }
+
+  void updateTyping(String s, bool isTyping) {}
 }
