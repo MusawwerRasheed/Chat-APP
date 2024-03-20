@@ -113,6 +113,7 @@ class ChatScreenState extends State<ChatScreen> {
     IsTypingRepository()
         .updateTypingStatus(FirebaseAuth.instance.currentUser!.uid, isTyping);
   }
+  final _debouncer = Debouncer(milliseconds: 500);
 
   @override
   Widget build(BuildContext context) {
@@ -248,11 +249,12 @@ class ChatScreenState extends State<ChatScreen> {
                       ),
                       child: CustomChatTextField(
                         onChangedFunction: (text) {
-                          if (text.isNotEmpty) {
-                            updateTypingStatus(true);
-                          } else {
-                            updateTypingStatus(false);
-                          }
+                          updateTypingStatus(true);
+_debouncer.run(() {
+
+  updateTypingStatus(false);
+
+});
                         },
                         inputColor: Colors.black,
                         fontSize: 12,

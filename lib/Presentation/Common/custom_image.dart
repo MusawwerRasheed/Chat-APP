@@ -21,6 +21,7 @@ class CustomImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return isAssetImage
         ? Image.asset(
             imageUrl ?? Assets.background!,
