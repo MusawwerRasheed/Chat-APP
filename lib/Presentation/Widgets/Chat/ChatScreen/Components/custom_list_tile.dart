@@ -20,13 +20,13 @@ class CustomListTile extends StatelessWidget {
       child: Row(
         // crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment:
-            message.senderId == FirebaseAuth.instance.currentUser!.uid
+            message.senderId != FirebaseAuth.instance.currentUser!.uid
                 ? MainAxisAlignment.start
                 : MainAxisAlignment.end,
         children: [
           Container(
             constraints: BoxConstraints(maxWidth: 190),
-            margin: message.senderId == FirebaseAuth.instance.currentUser!.uid
+            margin: message.senderId != FirebaseAuth.instance.currentUser!.uid
                 ? EdgeInsets.only(right: 120.sp)
                 : EdgeInsets.only(left: 150.sp),
             padding: EdgeInsets.only(left: 10.sp, top: 8.sp),

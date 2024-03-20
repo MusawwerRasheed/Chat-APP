@@ -2,9 +2,9 @@
  
 
 class UsersRepository {
-  Future searchUsers(String query) async {
+  Future searchUsers(String query, String currentUid) async {
     try {
-      return await FirestoreServices().searchUsers(query).then(
+      return await FirestoreServices().searchUsers(query, currentUid ).then(
         (value) {
            return value;
         },

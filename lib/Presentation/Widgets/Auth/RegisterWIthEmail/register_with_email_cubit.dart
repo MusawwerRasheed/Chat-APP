@@ -10,8 +10,7 @@ class RegisterWithEmailCubit extends Cubit<RegisterWithEmailState> {
   Future<void> registerWithEmail(Map<String, dynamic> registerationData) async {
     emit(LoadingRegisterWithEmailState());
 
-    UserModel user =
-        await AuthRepository.registerWithEmail(registerationData).then((value) {
+    UserModel user = await AuthRepository.registerWithEmail(registerationData).then((value) {
       if (value is! String) {
         emit(LoadedRegisterwithEmailState(value));
       } else {
@@ -20,7 +19,7 @@ class RegisterWithEmailCubit extends Cubit<RegisterWithEmailState> {
       return value;
     });
 
-    emit(LoadedRegisterwithEmailState(user));
+    // emit(LoadedRegisterwithEmailState(user));
   }
 
   @override

@@ -3,12 +3,9 @@ import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_quick_router/quick_router.dart';
-
-
-
 
 class FirestoreServices {
   static final currentUser = FirebaseAuth.instance.currentUser!;
@@ -124,13 +121,13 @@ class FirestoreServices {
     }
   }
 
-  Future<List<UserModel>> searchUsers(String query) async {
+  Future<List<UserModel>> searchUsers(String query, String currentUid) async {
     print('inside search users');
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .where(
           'uid',
-          isNotEqualTo: FirebaseAuth.instance.currentUser!.uid,
+          isNotEqualTo: currentUid,
         )
         .get();
 
@@ -228,13 +225,23 @@ class FirestoreServices {
     }
   }
 
+  Future<void> updateOnlineLastSeen(
+      bool onlineStatus, Timestamp lastSeen) async {
+    try {
+      print('inside the updating oinle seen ???????????????????');
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'isOnline': onlineStatus, 'lastSeen': lastSeen});
+    } catch (e) {
+      throw (e);
+    }
+  }
 
-
-
-
-  Stream<bool> isTyping(String userId, bool typingStatus) {
+  Future<void> updateTypingStatus(String userId, bool typingStatus) async {
     try {
       print('inside isTyping services');
+      print(typingStatus);
       FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -243,7 +250,6 @@ class FirestoreServices {
       }).catchError((error) {
         print('Failed to update isTyping status: $error');
       });
-      return Stream<bool>.value(typingStatus);
     } catch (e) {
       print('<><><> ERROR <><><><>< inside is typing');
       throw e;
@@ -253,7 +259,112 @@ class FirestoreServices {
 
 
 
- 
+
+
+
+
+
+
+
+
+  Stream<bool> getOnlineStatus(String otherUserId) {
+    try {
+      DocumentReference docRef =
+          FirebaseFirestore.instance.collection('users').doc(otherUserId);
+      return docRef
+          .snapshots()
+          .map((snapshot) {
+            if (snapshot.exists) {
+              Map<String, dynamic> data =
+                  snapshot.data() as Map<String, dynamic>;
+              return data['isOnline'] ?? false;
+            } else
+              return false;
+          })
+          .distinct()
+          .cast<bool>();
+    } catch (e) {
+      print('error in online status services');
+      return Stream<bool>.empty();
+    }
+  }
+
+
+
+
+  Stream<bool> getTypingStream(String otherUserId) {
+    try {
+      DocumentReference docRef =
+          FirebaseFirestore.instance.collection('users').doc(otherUserId);
+
+      return docRef
+          .snapshots()
+          .map((snapshot) {
+            if (snapshot.exists) {
+              Map<String, dynamic> data =
+                  snapshot.data() as Map<String, dynamic>;
+
+              return data['isTyping'] ?? false;
+            } else {
+              return false;
+            }
+          })
+          .distinct()
+          .cast<bool>();
+    } catch (e) {
+      print('Error getting typing status: $e');
+      return Stream<bool>.empty();
+    }
+  }
+
+
+
+
+Stream<String> getLastSeen(String otherUserId) {
+  try {
+    DocumentReference docRef =
+        FirebaseFirestore.instance.collection('users').doc(otherUserId);
+    return docRef
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.exists) {
+            Map<String, dynamic> data =
+                snapshot.data() as Map<String, dynamic>;
+            Timestamp lastSeen = data['lastSeen'] ?? Timestamp.now();
+            return _formatLastSeen(lastSeen);
+          } else {
+            return 'Last seen: never';
+          }
+        })
+        .distinct()
+        .cast<String>();
+  } catch (e) {
+    print('error in online status services');
+    return Stream<String>.empty();
+  }
+}
+
+String _formatLastSeen(Timestamp timestamp) {
+  Duration difference = Timestamp.now().toDate().difference(timestamp.toDate());
+  if (difference.inSeconds < 60) {
+    return 'Online';
+  } else if (difference.inMinutes < 60) {
+    return 'Last seen: ${difference.inMinutes}m ago';
+  } else if (difference.inHours < 24) {
+    return 'Last seen: ${difference.inHours}h ago';
+  } else if(difference.inDays<10){
+    return 'Last seen: ${difference.inDays}D ago';
+  }
+   {
+    return 'Last seen: ${timestamp.toDate()}';
+  }
+}
+
+
+
+
+
+
   Stream<List<ChatModel>> getChat(String chatRoomId) async* {
     try {
       final Stream<QuerySnapshot<Map<String, dynamic>>> chatsStream =
@@ -283,7 +394,10 @@ class FirestoreServices {
       throw e;
     }
   }
-
-
-  
 }
+
+
+
+
+ 
+ 

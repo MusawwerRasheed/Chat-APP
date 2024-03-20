@@ -18,6 +18,7 @@ class LoginScreen extends StatefulWidget {
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
+  
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -68,8 +69,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   context.to(RegisterWithEmail());
                 },
                 style: ElevatedButton.styleFrom(
-                  elevation: 2, // Adjust elevation as needed
-                  minimumSize: Size(200.w, 50.h), // Adjust size as needed
+                  elevation: 2,  
+                  minimumSize: Size(200.w, 50.h),  
                 ),
                 child: CustomText(customText: 'SIgn up with Email'),
               ),

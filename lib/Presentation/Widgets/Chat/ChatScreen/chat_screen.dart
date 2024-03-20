@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/Repository/ChatRepository/chat_repository.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Data/Repository/ChatRepository/is_typing_repository.dart';
+import 'package:chat_app/Data/Repository/OnlineStatusRepository/online_status_repo.dart';
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
@@ -14,31 +16,40 @@ import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Components/custom_
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/chat_screen.controller.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_appbar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Users/ChatUsersCubit/chat_users_cubit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; 
-
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final UserModel? otherUser;
-  const ChatScreen({Key? key, this.chatRoomId, this.otherUser})
-      : super(key: key);
+
+  ChatScreen({
+    Key? key,
+    this.chatRoomId,
+    this.otherUser,
+  }) : super(key: key);
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  State<ChatScreen> createState() => ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class ChatScreenState extends State<ChatScreen> {
   TextEditingController inputController = TextEditingController();
   ValueNotifier<bool> isStreamEmpty = ValueNotifier<bool>(false);
   ValueNotifier<List<ChatModel>> chatMessagesNotifier =
       ValueNotifier<List<ChatModel>>([]);
   ScrollController scrollController = ScrollController();
   late ValueNotifier<bool> isTypingNotifier;
+  late ValueNotifier<String> lastSeenNotifier;
+  late ValueNotifier<bool> onlineStatusNotifier;
   late StreamSubscription<bool> typingSubscription;
-
+  late StreamSubscription<bool> onlineStatusSubscription;
+  late StreamSubscription<String> lastSeenSubscription;
+  // List<String> imagespaths = [];
+  List<String> imagePaths = [];
+  List<Widget> widgetsList = [];
   @override
   void initState() {
     super.initState();
@@ -46,11 +57,24 @@ class _ChatScreenState extends State<ChatScreen> {
     print(widget.chatRoomId);
 
     isTypingNotifier = ValueNotifier<bool>(false);
-
+    onlineStatusNotifier = ValueNotifier<bool>(false);
+    lastSeenNotifier = ValueNotifier<String>('');
     typingSubscription = IsTypingRepository()
-        .listenTyping(widget.otherUser!.uid!, isTypingNotifier.value)
+        .typingStream(widget.otherUser!.uid!)
         .listen((event) {
       isTypingNotifier.value = event;
+    });
+
+    onlineStatusSubscription = OnlineStatusRepo()
+        .onlineStatusStream(widget.otherUser!.uid!)
+        .listen((event) {
+      onlineStatusNotifier.value = event;
+    });
+
+    lastSeenSubscription = OnlineStatusRepo()
+        .lastSeenStream(widget.otherUser!.uid!)
+        .listen((event) {
+      lastSeenNotifier.value = event;
     });
 
     scrollController.addListener(() {
@@ -86,7 +110,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void updateTypingStatus(bool isTyping) {
-    IsTypingRepository().listenTyping(widget.otherUser!.uid!, isTyping);
+    IsTypingRepository()
+        .updateTypingStatus(FirebaseAuth.instance.currentUser!.uid, isTyping);
   }
 
   @override
@@ -136,12 +161,38 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                 5.x,
                 Container(
-                  width: 120,
+                  width: 40,
                   child: CustomText(
                     customText: widget.otherUser!.displayName!.trim(),
                     textStyle: Styles.plusJakartaSans(context),
                   ),
                 ),
+                onlineStatusNotifier.value == true
+                    ? ValueListenableBuilder<bool>(
+                        valueListenable: onlineStatusNotifier,
+                        builder: (context, online, _) {
+                          return online
+                              ? Container(
+                                  margin: EdgeInsets.only(right: 4),
+                                  height: 10,
+                                  width: 10,
+                                  decoration: BoxDecoration(
+                                      color: AppColors.Green,
+                                      borderRadius: BorderRadius.circular(50)),
+                                )
+                              : const SizedBox.shrink();
+                        },
+                      )
+                    : ValueListenableBuilder<String>(
+                        valueListenable: lastSeenNotifier,
+                        builder: (context, lastSeen, _) {
+                          return CustomText(
+                            customText: lastSeen,
+                            textStyle: Styles.smallPlusJakartaSans(context,
+                                fontSize: 12),
+                          );
+                        },
+                      ),
               ],
             ),
             ValueListenableBuilder<bool>(
@@ -178,7 +229,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         var message = chatMessages[index];
                         return Padding(
                           padding: const EdgeInsets.only(left: 10, bottom: 5),
-                          child:  CustomListTile(message: message),
+                          child: CustomListTile(message: message),
                         );
                       },
                     );
@@ -206,9 +257,46 @@ class _ChatScreenState extends State<ChatScreen> {
                         inputColor: Colors.black,
                         fontSize: 12,
                         iconColor: Colors.grey,
-                        suffix: const Icon(Icons.image),
-                        suffixFunction: (){
-                      ChatScreenController().pickImage();
+                        suffix:
+                            const Icon(Icons.image, color: AppColors.lightGrey),
+                        suffixFunction: () async {
+                          // Call pickImages and wait for the result
+                          List<String> newImagePaths =
+                              await ChatScreenController().pickImages(context);
+
+                          // Add the new paths to the existing list
+                          imagePaths.addAll(newImagePaths);
+
+                          // Show the AlertDialog with the updated image paths
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                content: Container(
+                                  height: 200,
+                                  width: 200,
+                                  child: ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children: [
+                                      for (String path in imagePaths)
+                                        Builder(
+                                          builder: (BuildContext context) {
+                                            print(
+                                                'Trying to load image: $path');
+                                            return Image.file(File(path));
+                                          },
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+
+                          // Clear the list for the next use
+                          setState(() {
+                            imagePaths = [];
+                          });
                         },
                         inputController: inputController,
                       ),
@@ -253,7 +341,7 @@ class _ChatScreenState extends State<ChatScreen> {
             left: 280,
             child: GestureDetector(
               onTap: () {
-                ChatScreenController().scrollToBottom();
+                // ChatScreenController().scrollToBottom();
               },
               child: Visibility(
                 visible: isBottomContainerVisible,
@@ -283,7 +371,10 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
- 
+
+  updateImagePaths() {
+    imagePaths = [];
+  }
 
   @override
   void dispose() {

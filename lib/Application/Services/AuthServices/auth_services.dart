@@ -49,7 +49,10 @@ class Auth {
         imageUrl: '',
       );
       await FirestoreServices.storeUserdata(userModel);
-      return Result(userModel, null);
+      print('>>>>>>><<<<<>>><<<<>>'); 
+      print(userModel); 
+      print('<<>><<><<><<<>9999999999999');
+      return userModel;
     } catch (e) {
       String authExceptions = AuthExceptionHandler.handleLoginException(e);
       return authExceptions;
@@ -80,6 +83,7 @@ class Auth {
           uid: authResult.user?.uid,
           displayName: authResult.user?.displayName,
           imageUrl: authResult.user?.photoURL,
+          
         );
         await FirestoreServices.storeUserdata(userModel);
         return userModel;

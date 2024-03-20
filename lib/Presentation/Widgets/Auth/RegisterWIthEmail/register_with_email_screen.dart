@@ -93,6 +93,8 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
                 BlocConsumer<RegisterWithEmailCubit, RegisterWithEmailState>(
                   listener: (context, state) {
                     if (state is LoadedRegisterwithEmailState) {
+                      print('(((((((((((((((((((( ))))))))))))))))))))');
+                      print(state); 
                       final userModel = state.user;
                       print(userModel.displayName);
 

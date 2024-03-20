@@ -8,6 +8,8 @@ class UserModel {
   final String? imageUrl;
   final String? uid;
   final bool? isTyping;
+  final bool? isOnline;
+  final Timestamp? lastSeen; 
 
   UserModel({
     this.displayName,
@@ -15,6 +17,8 @@ class UserModel {
     this.imageUrl,
     this.uid,
     this.isTyping,
+    this.isOnline,
+    this.lastSeen,
   });
 
   UserModel copyWith({
@@ -41,6 +45,9 @@ class UserModel {
         email: json["email"],
         imageUrl: json["imageUrl"],
         uid: json["uid"],
+        isTyping: json["isTyping"],
+        isOnline: json["isOnline"],
+        lastSeen: json["lastSeen"],
 
       );
 
@@ -50,17 +57,24 @@ class UserModel {
         "imageUrl": imageUrl,
         "uid": uid,
         "isTyping": isTyping, 
+        "isOnline":isOnline,
+        "lastSeen":lastSeen,
       };
+
 
   factory UserModel.fromSnapshot(DocumentSnapshot snapshot) {
     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
     return UserModel(
-      displayName: data['displayName'] ?? "",
-      imageUrl: data['imageUrl'] ?? "",
+      displayName: data['displayName'] ,
+      email: data['email'],
+      imageUrl: data['imageUrl']  ,
       uid: data['uid']??"", 
       isTyping: data['isTyping']??false,
-    );
+     
+     );
   }
+
+  
 }
  
  

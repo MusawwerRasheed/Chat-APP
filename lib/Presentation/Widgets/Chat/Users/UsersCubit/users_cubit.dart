@@ -10,11 +10,11 @@ class UsersCubit extends Cubit<UsersState> {
 
   UsersCubit() : super(UsersInitialState());
 
-  Future<void> getUsers(String query) async {
+  Future<void> getUsers(String query, String currentUid) async {
     emit(UsersInitialState());
 
     try {
-      List<UserModel> users = await UsersRepository().searchUsers(query);
+      List<UserModel> users = await UsersRepository().searchUsers(query, currentUid );
         
 
       emit(UsersLoadedState(users));
@@ -24,9 +24,5 @@ class UsersCubit extends Cubit<UsersState> {
       print('error in users cubit');
     }
   }
-
-
-   
  
-
 }
