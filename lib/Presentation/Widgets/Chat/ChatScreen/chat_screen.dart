@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+
+
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final UserModel? otherUser;
@@ -261,45 +263,77 @@ _debouncer.run(() {
                         iconColor: Colors.grey,
                         suffix:
                             const Icon(Icons.image, color: AppColors.lightGrey),
-                        suffixFunction: () async {
-                          // Call pickImages and wait for the result
-                          List<String> newImagePaths =
-                              await ChatScreenController().pickImages(context);
 
-                          // Add the new paths to the existing list
-                          imagePaths.addAll(newImagePaths);
 
-                          // Show the AlertDialog with the updated image paths
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                content: Container(
-                                  height: 200,
-                                  width: 200,
-                                  child: ListView(
-                                    scrollDirection: Axis.horizontal,
-                                    children: [
-                                      for (String path in imagePaths)
-                                        Builder(
-                                          builder: (BuildContext context) {
-                                            print(
-                                                'Trying to load image: $path');
-                                            return Image.file(File(path));
-                                          },
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                        suffixFunction: () {
+  ChatScreenController().pickImages(context).then((value) {
+    // Create a temporary list to store new images
+    List<String> newImages = [];
 
-                          // Clear the list for the next use
-                          setState(() {
-                            imagePaths = [];
-                          });
-                        },
+    // Add only the images that are not already in imagePaths
+    for (var imagePath in value) {
+      if (!imagePaths.contains(imagePath)) {
+        newImages.add(imagePath);
+      }
+    }
+
+    // Add the new images to imagePaths
+    imagePaths.addAll(newImages);
+
+    // Proceed with the rest of your logic...
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Center(
+          child: Container(
+            height: 400,
+            width: 250,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Number of columns in the grid
+                    ),
+                    itemCount: imagePaths.length,
+                    itemBuilder: (context, index) {
+                      return Image.file(File(imagePaths[index]));
+                    },
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 70,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(90),
+                        ),
+                      ),
+                      backgroundColor: MaterialStateProperty.all(
+                        AppColors.blue,
+                      ),
+                    ),
+                    onPressed: () {
+                      // Handle button press here
+                    },
+                    child: Icon(
+                      Icons.send,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  });
+},
+
+
                         inputController: inputController,
                       ),
                     ),

@@ -11,6 +11,7 @@ class OnlineStatusCubit extends Cubit<OnlineStatusLastSeenState> {
   OnlineStatusCubit() : super(OnlineInitialState());
 
   Future<void> updateOlineStatusLastSeen(bool isOnline, Timestamp lastSeen) async {
+
     emit(OnlineInitialState());
 
     try {

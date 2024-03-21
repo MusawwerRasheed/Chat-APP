@@ -36,6 +36,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+
     super.initState();
     currentUser = FirebaseAuth.instance.currentUser;
     searchValueNotifier = ValueNotifier<String>('');
@@ -43,6 +44,7 @@ class _HomeState extends State<Home> {
     context.read<ChatUsersCubit>().getChatUsers();
     context.read<UsersCubit>().getUsers('', FirebaseAuth.instance.currentUser!.uid);
     context.read<OnlineStatusCubit>().updateOlineStatusLastSeen(true, Timestamp.now());
+
   }
  
    

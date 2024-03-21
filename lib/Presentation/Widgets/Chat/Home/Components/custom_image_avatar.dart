@@ -22,8 +22,8 @@ class CustomImageAvatar extends StatelessWidget {
       children: [
         user.imageUrl == ''
             ? Container(
-                width: isForSearch == true ? 30 : 40.w,
-                height: isForSearch == true ? 30 : 40.h,
+                width: isForSearch == true ? 30 : 50.w,
+                height: isForSearch == true ? 30 : 50.h,
                 decoration: BoxDecoration(
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(30),
@@ -47,8 +47,8 @@ class CustomImageAvatar extends StatelessWidget {
                 child: CustomImage(
                   isAssetImage: false,
                   imageUrl: user.imageUrl,
-                  width: isForSearch! ? 30 : 42.w,
-                  height: isForSearch == true ? 30 : 42.h,
+                  width: isForSearch! ? 30 : 53.w,
+                  height: isForSearch == true ? 30 : 53.h,
                 ),
               ),
         10.x,
@@ -60,7 +60,7 @@ class CustomImageAvatar extends StatelessWidget {
               customText: user.displayName!,
               textStyle: Styles.plusJakartaSans(
                 context,
-                fontSize: isForSearch == true ? 13 : 17,
+                fontSize: isForSearch == true ? 13 : 21,
                 fontWeight: FontWeight.bold,
               ),
             ),
