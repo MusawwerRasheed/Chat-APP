@@ -7,6 +7,7 @@ class ChatModel {
     final String? senderId;
     final String? text;
     final String? uid;
+    final String? type;
     final DateTime? timestamp;
 
     ChatModel( {
@@ -14,6 +15,7 @@ class ChatModel {
         this.senderId,
         this.text,
         this.uid,
+        this.type, 
         this.timestamp,
     });
 
@@ -41,6 +43,7 @@ class ChatModel {
         senderId: json["senderId"],
         text: json["text"],
         uid: json["uid"],
+        type: json["type"],
         timestamp: json["datetime"] == null ? null : DateTime.parse(json["datetime"]),
     );
 
@@ -49,6 +52,7 @@ class ChatModel {
         "senderId": senderId,
         "text": text,
         "uid": uid,
+        "type": type, 
         "timestamp":  FieldValue.serverTimestamp(),
     };
 }

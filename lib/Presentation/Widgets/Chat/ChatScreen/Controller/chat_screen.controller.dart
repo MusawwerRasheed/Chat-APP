@@ -28,22 +28,23 @@ class ChatScreenController {
         File imageFile = File(pickedFile.path);
         imagePaths.add(imageFile.path);
       }
-
       print('Image paths after picking: $imagePaths');
     }
-
     return imagePaths;
   }
 
   void scrollToBottom() {
     scrollController!.animateTo(
-      scrollController!.position.maxScrollExtent,
+      scrollController!.position.minScrollExtent,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOutQuint,
     );
-  }
  
+  
+  }
 
+
+  
 }
 
 

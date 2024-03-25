@@ -21,8 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
-
 class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final UserModel? otherUser;
@@ -38,6 +36,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
+  bool isLoadingImage = false;
   TextEditingController inputController = TextEditingController();
   ValueNotifier<bool> isStreamEmpty = ValueNotifier<bool>(false);
   ValueNotifier<List<ChatModel>> chatMessagesNotifier =
@@ -49,13 +48,13 @@ class ChatScreenState extends State<ChatScreen> {
   late StreamSubscription<bool> typingSubscription;
   late StreamSubscription<bool> onlineStatusSubscription;
   late StreamSubscription<String> lastSeenSubscription;
-  // List<String> imagespaths = [];
   List<String> imagePaths = [];
+  List<String> imagesRecieved = [];
   List<Widget> widgetsList = [];
+  @override
   @override
   void initState() {
     super.initState();
-    initChatStream();
     print(widget.chatRoomId);
 
     isTypingNotifier = ValueNotifier<bool>(false);
@@ -80,8 +79,10 @@ class ChatScreenState extends State<ChatScreen> {
     });
 
     scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-          scrollController.position.minScrollExtent) {
+      final isAtBottom = scrollController.position.pixels ==
+          scrollController.position.minScrollExtent;
+
+      if (isAtBottom) {
         setState(() {
           isBottomContainerVisible = false;
         });
@@ -91,6 +92,8 @@ class ChatScreenState extends State<ChatScreen> {
         });
       }
     });
+
+    initChatStream();
   }
 
   bool isBottomContainerVisible = false;
@@ -115,6 +118,7 @@ class ChatScreenState extends State<ChatScreen> {
     IsTypingRepository()
         .updateTypingStatus(FirebaseAuth.instance.currentUser!.uid, isTyping);
   }
+
   final _debouncer = Debouncer(milliseconds: 500);
 
   @override
@@ -230,10 +234,105 @@ class ChatScreenState extends State<ChatScreen> {
                       itemCount: chatMessages.length,
                       itemBuilder: (context, index) {
                         var message = chatMessages[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 10, bottom: 5),
-                          child: CustomListTile(message: message),
-                        );
+                        if (message.type == 'text' && message.type != null) {
+                          return CustomListTile(message: message);
+                        } else {
+                          return FutureBuilder<List<String>>(
+                            future: deconcatinateAsync(message.text),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<List<String>> snapshot) {
+                              if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                List<String>? newImagePaths = snapshot.data;
+                                if (newImagePaths != null &&
+                                    newImagePaths.isNotEmpty) {
+                                  return Container(
+                                    margin: message.senderId ==
+                                            FirebaseAuth
+                                                .instance.currentUser!.uid
+                                        ? const EdgeInsets.only(
+                                            left: 90, top: 10, bottom: 10)
+                                        : const EdgeInsets.only(
+                                            right: 90, top: 10, bottom: 10),
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: message.senderId == 
+                                              FirebaseAuth
+                                                  .instance.currentUser!.uid
+                                          ? AppColors.blue
+                                          : AppColors.grey,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: GridView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: newImagePaths.length,
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount:
+                                            newImagePaths.length > 1 ? 2 : 1,
+                                        crossAxisSpacing: 5.0,
+                                        mainAxisSpacing: 5.0,
+                                      ),
+                                      itemBuilder: (context, index) {
+                                        if (index == newImagePaths.length - 1 &&
+                                            isLoadingImage) {
+                                          return CircularProgressIndicator();
+                                        } else {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Dialog(
+                                                    child: Image.network(
+                                                      newImagePaths[index],
+                                                      fit: BoxFit.fill,
+                                                      width: 00,
+                                                      height: 500,
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.grey
+                                                        .withOpacity(0.5),
+                                                    spreadRadius: 2,
+                                                    blurRadius: 5,
+                                                    offset: Offset(0, 3),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  newImagePaths[index],
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              }
+                            },
+                          );
+                        }
                       },
                     );
                   },
@@ -252,88 +351,99 @@ class ChatScreenState extends State<ChatScreen> {
                       child: CustomChatTextField(
                         onChangedFunction: (text) {
                           updateTypingStatus(true);
-_debouncer.run(() {
-
-  updateTypingStatus(false);
-
-});
+                          _debouncer.run(() {
+                            updateTypingStatus(false);
+                          });
                         },
                         inputColor: Colors.black,
                         fontSize: 12,
                         iconColor: Colors.grey,
                         suffix:
                             const Icon(Icons.image, color: AppColors.lightGrey),
-
-
                         suffixFunction: () {
-  ChatScreenController().pickImages(context).then((value) {
-    // Create a temporary list to store new images
-    List<String> newImages = [];
+                          ChatScreenController()
+                              .pickImages(context)
+                              .then((value) {
+                            List<String> newImages = [];
 
-    // Add only the images that are not already in imagePaths
-    for (var imagePath in value) {
-      if (!imagePaths.contains(imagePath)) {
-        newImages.add(imagePath);
-      }
-    }
+                            for (var imagePath in value) {
+                              if (!imagePaths.contains(imagePath)) {
+                                newImages.add(imagePath);
+                                imagePaths.clear();
+                              }
+                            }
 
-    // Add the new images to imagePaths
-    imagePaths.addAll(newImages);
+                            imagePaths.addAll(newImages);
 
-    // Proceed with the rest of your logic...
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => Center(
-          child: Container(
-            height: 400,
-            width: 250,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: GridView.builder(
-                    scrollDirection: Axis.horizontal,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Number of columns in the grid
-                    ),
-                    itemCount: imagePaths.length,
-                    itemBuilder: (context, index) {
-                      return Image.file(File(imagePaths[index]));
-                    },
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 70,
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(90),
-                        ),
-                      ),
-                      backgroundColor: MaterialStateProperty.all(
-                        AppColors.blue,
-                      ),
-                    ),
-                    onPressed: () {
-                      // Handle button press here
-                    },
-                    child: Icon(
-                      Icons.send,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  });
-},
-
-
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => Center(
+                                  child: Container(
+                                    height: 400,
+                                    width: 250,
+                                    child: Stack(
+                                      children: [
+                                        Positioned.fill(
+                                          child: GridView.builder(
+                                            scrollDirection: Axis.horizontal,
+                                            gridDelegate:
+                                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 2,
+                                            ),
+                                            itemCount: imagePaths.length,
+                                            itemBuilder: (context, index) {
+                                              return Image.file(
+                                                  File(imagePaths[index]));
+                                            },
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 0,
+                                          left: 70,
+                                          child: ElevatedButton(
+                                            style: ButtonStyle(
+                                              shape: MaterialStateProperty.all(
+                                                RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(90),
+                                                ),
+                                              ),
+                                              backgroundColor:
+                                                  MaterialStateProperty.all(
+                                                AppColors.blue,
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              FirestoreServices().sendMessage(
+                                                chatRoomId: widget.chatRoomId,
+                                                otherUserId:
+                                                    widget.otherUser?.uid,
+                                                context: context,
+                                                imagePaths: imagePaths,
+                                                isStreamEmpty:
+                                                    isStreamEmpty.value,
+                                              );
+                                              context
+                                                  .read<ChatUsersCubit>()
+                                                  .getChatUsers();
+                                              initChatStream();
+                                              inputController.clear();
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Icon(
+                                              Icons.send,
+                                              color: AppColors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          });
+                        },
                         inputController: inputController,
                       ),
                     ),
@@ -342,11 +452,12 @@ _debouncer.run(() {
                     onTap: () {
                       if (inputController.text.isNotEmpty) {
                         FirestoreServices().sendMessage(
-                          widget.chatRoomId,
-                          inputController.text,
-                          widget.otherUser?.uid,
-                          context,
-                          isStreamEmpty.value,
+                          chatRoomId: widget.chatRoomId,
+                          messageText:
+                              inputController.text, // Pass the text message
+                          otherUserId: widget.otherUser?.uid,
+                          context: context,
+                          isStreamEmpty: isStreamEmpty.value,
                         );
                         context.read<ChatUsersCubit>().getChatUsers();
                         initChatStream();
@@ -377,7 +488,8 @@ _debouncer.run(() {
             left: 280,
             child: GestureDetector(
               onTap: () {
-                // ChatScreenController().scrollToBottom();
+                ChatScreenController(scrollController: scrollController)
+                    .scrollToBottom();
               },
               child: Visibility(
                 visible: isBottomContainerVisible,
@@ -388,14 +500,14 @@ _debouncer.run(() {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(),
-                      color: Colors.transparent,
+                      color: Colors.grey,
                       borderRadius: BorderRadius.circular(50),
                     ),
                     height: 25,
                     width: 25,
                     child: const Icon(
                       Icons.arrow_downward,
-                      color: AppColors.blackColor,
+                      color: AppColors.white,
                       size: 20,
                     ),
                   ),
@@ -408,15 +520,26 @@ _debouncer.run(() {
     );
   }
 
-  updateImagePaths() {
-    imagePaths = [];
-  }
-
   @override
   void dispose() {
     chatMessagesNotifier.dispose();
     scrollController.dispose();
     typingSubscription.cancel();
     super.dispose();
+  }
+
+  void someOtherFunction() {
+    print('hey it works');
+  }
+
+  Future<List<String>> deconcatinateAsync(String? contatinatedString) async {
+    if (contatinatedString == null) {
+      return [];
+    }
+
+    List<String> paths =
+        contatinatedString.split(',').map((path) => path.trim()).toList();
+
+    return paths;
   }
 }

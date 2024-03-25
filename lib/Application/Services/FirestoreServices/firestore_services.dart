@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
@@ -6,6 +7,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_quick_router/quick_router.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+ 
+ 
+ 
 
 class FirestoreServices {
   static final currentUser = FirebaseAuth.instance.currentUser!;
@@ -187,43 +194,306 @@ class FirestoreServices {
       print('Error updating chat room IDs for users: $e');
     }
   }
+ 
+  
 
-  Future<void> sendMessage(String? chatRoomId, String? messageText,
-      String? otherUserId, BuildContext? context, bool? isStreamEmpty) async {
-    try {
-      if (isStreamEmpty!) {
-        print('Stream is empty, creating new chat room...');
-        String chatroomid = await createChatRoom(
-            FirebaseAuth.instance.currentUser!.uid, otherUserId!);
-        print('New chatroom created with ID: $chatroomid');
 
-        FirebaseFirestore.instance.collection('messages').add(
-              ChatModel(
-                chatroomId: chatroomid,
-                senderId: FirebaseAuth.instance.currentUser!.uid,
-                text: messageText,
-                timestamp: DateTime.now(),
-                uid: otherUserId,
-              ).toJson(),
-            );
-        print('Message sent to new chat room.');
-      } else {
-        print('Stream is not empty, sending message to existing chat room...');
-        FirebaseFirestore.instance.collection('messages').add(
-              ChatModel(
-                chatroomId: chatRoomId,
-                senderId: FirebaseAuth.instance.currentUser!.uid,
-                text: messageText,
-                timestamp: DateTime.now(),
-                uid: otherUserId,
-              ).toJson(),
-            );
-        print('Message sent to existing chat room.');
+Future<void> sendMessage({
+  String? chatRoomId,
+  String? messageText,
+  String? otherUserId,
+  BuildContext? context,
+  bool? isStreamEmpty,
+  List<String>? imagePaths,
+}) async {
+  try {
+    String messageType = (imagePaths != null && imagePaths.isNotEmpty) ? 'image' : 'text';
+
+    if (isStreamEmpty!) {
+      print('Stream is empty, creating new chat room...');
+      String chatroomId = await createChatRoom(
+        FirebaseAuth.instance.currentUser!.uid,
+        otherUserId!,
+      );
+      print('New chatroom created with ID: $chatroomId');
+
+      String textMessage = messageText ?? '';
+
+      List<String> imageUrls = [];
+      if (messageType == 'image') {
+        print('Calling _uploadImages...');
+        imageUrls = await _uploadImages(imagePaths!);
+        print('Uploaded Image URLs: $imageUrls');
       }
-    } catch (e) {
-      print("Error sending message: $e");
+
+      String finalMessage = _constructMessageText(textMessage, imageUrls);
+      print('Final Message: $finalMessage');
+
+      // Save message to Firestore
+      FirebaseFirestore.instance.collection('messages').add(
+        ChatModel(
+          chatroomId: chatroomId,
+          senderId: FirebaseAuth.instance.currentUser!.uid,
+          text: finalMessage,
+          type: messageType,
+          timestamp: DateTime.now(),
+          uid: otherUserId,
+        ).toJson(),
+      );
+      print('Message sent to new chat room.');
+    } else {
+      print('Stream is not empty, sending message to existing chat room...');
+
+      String textMessage = messageText ?? '';
+
+      List<String> imageUrls = [];
+      if (messageType == 'image') {
+        print('Calling _uploadImages...');
+        imageUrls = await _uploadImages(imagePaths!);
+        print('Uploaded Image URLs: $imageUrls');
+      }
+
+      String finalMessage = _constructMessageText(textMessage, imageUrls);
+      print('Final Message: $finalMessage');
+
+      FirebaseFirestore.instance.collection('messages').add(
+        ChatModel(
+          chatroomId: chatRoomId,
+          senderId: FirebaseAuth.instance.currentUser!.uid,
+          text: finalMessage,
+          type: messageType,
+          timestamp: DateTime.now(),
+          uid: otherUserId,
+        ).toJson(),
+      );
+      print('Message sent to existing chat room.');
     }
+  } catch (e) {
+    print("Error sending message: $e");
   }
+}
+
+
+ Future<List<String>> _uploadImages(List<String> imagePaths) async {
+  List<String> imageUrls = [];
+
+  try {
+    List<Future<firebase_storage.TaskSnapshot>> uploadFutures = [];
+
+    for (String imagePath in imagePaths) {
+      File imageFile = File(imagePath);
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      firebase_storage.Reference reference =
+          firebase_storage.FirebaseStorage.instance.ref().child('images/$fileName.jpg');
+      
+      // Add the upload future to the list
+      Future<firebase_storage.TaskSnapshot> uploadFuture =
+          reference.putFile(imageFile).then((task) => task);
+      uploadFutures.add(uploadFuture);
+    }
+
+    // Wait for all uploads to complete
+    List<firebase_storage.TaskSnapshot> snapshots = await Future.wait(uploadFutures);
+
+    // Get download URLs for uploaded images
+    for (firebase_storage.TaskSnapshot snapshot in snapshots) {
+      String imageUrl = await snapshot.ref.getDownloadURL();
+      imageUrls.add(imageUrl);
+    }
+  } catch (e) {
+    print('Error uploading images: $e');
+  }
+
+  return imageUrls;
+}
+
+
+
+
+
+String _constructMessageText(String text, List<String> imageUrls) {
+  print('Inside constructing message');
+  print('Image URLs: $imageUrls'); 
+  String finalMessage = text;
+  if (imageUrls.isNotEmpty) {
+    String concatenatedUrls = imageUrls.join(', ');
+    finalMessage += '\n\n$concatenatedUrls';
+  }
+  print('Final Message: $finalMessage');
+  return finalMessage;
+}
+
+
+
+
+
+
+
+// Future<void> sendMessage({
+//   String? chatRoomId,
+//   String? messageText,
+//   String? otherUserId,
+//   BuildContext? context,
+//   bool? isStreamEmpty,
+//   List<String>? imagePaths,
+// }) async {
+//   try {
+//     String messageType = (imagePaths != null && imagePaths.isNotEmpty) ? 'image' : 'text';
+
+//     if (isStreamEmpty!) {
+//       print('Stream is empty, creating new chat room...');
+//       String chatroomId = await createChatRoom(
+//         FirebaseAuth.instance.currentUser!.uid,
+//         otherUserId!,
+//       );
+//       print('New chatroom created with ID: $chatroomId');
+
+//       String textMessage = messageText ?? '';
+
+//       List<String> imageUrls = imagePaths!;
+//       if (messageType == 'image') {
+//         imageUrls = await _uploadImages(imagePaths!);
+//       }
+
+//       // Construct message with image URLs
+//       // String finalMessage = _constructMessageText(textMessage, imageUrls);
+//       String finalMessage = _constructMessageText(textMessage, imageUrls);
+// print('Final Message: $finalMessage');
+
+
+//       // Save message to Firestore
+//       FirebaseFirestore.instance.collection('messages').add(
+//         ChatModel(
+//           chatroomId: chatroomId,
+//           senderId: FirebaseAuth.instance.currentUser!.uid,
+//           text: finalMessage,
+//           type: messageType,
+//           timestamp: DateTime.now(),
+//           uid: otherUserId,
+//         ).toJson(),
+//       );
+//       print('Message sent to new chat room.');
+//     } else {
+//       print('Stream is not empty, sending message to existing chat room...');
+
+//       String textMessage = messageText ?? '';
+
+//       List<String> imageUrls = imagePaths!;
+//       if (messageType == 'image') {
+//         imageUrls = await _uploadImages(imagePaths!);
+//       }
+
+      
+//       String finalMessage = _constructMessageText(textMessage, imageUrls);
+
+       
+//       FirebaseFirestore.instance.collection('messages').add(
+//         ChatModel(
+//           chatroomId: chatRoomId,
+//           senderId: FirebaseAuth.instance.currentUser!.uid,
+//           text: finalMessage,
+//           type: messageType,
+//           timestamp: DateTime.now(),
+//           uid: otherUserId,
+//         ).toJson(),
+//       );
+//       print('Message sent to existing chat room.');
+//     }
+//   } catch (e) {
+//     print("Error sending message: $e");
+//   }
+// }
+
+//  Future<List<String>> _uploadImages(List<String> imagePaths) async {
+//   List<String> imageUrls = [];
+
+//   try {
+//     List<firebase_storage.UploadTask> uploadTasks = [];
+
+//     for (String imagePath in imagePaths) {
+//       File imageFile = File(imagePath);
+//       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+//       firebase_storage.Reference reference =
+//           firebase_storage.FirebaseStorage.instance.ref().child('images/$fileName.jpg');
+      
+//       // Add the upload task to the list
+//       firebase_storage.UploadTask uploadTask = reference.putFile(imageFile);
+//       uploadTasks.add(uploadTask);
+//     }
+
+//     // Wait for all uploads to complete
+//     await Future.wait(uploadTasks);
+
+//     // Get download URLs for uploaded images
+//     for (firebase_storage.UploadTask task in uploadTasks) {
+//       firebase_storage.TaskSnapshot snapshot = await task;
+//       String imageUrl = await snapshot.ref.getDownloadURL();
+//       imageUrls.add(imageUrl);
+//     }
+//   } catch (e) {
+//     print('Error uploading images: $e');
+//   }
+
+//   return imageUrls;
+// }
+
+
+
+// String _constructMessageText(String text, List<String> imageUrls) {
+//   print('inside constrcuting message');
+//   print(imageUrls); 
+//   String finalMessage = text;
+//   if (imageUrls.isNotEmpty) {
+//     String concatenatedUrls = imageUrls.join(', ');
+//     print(concatenatedUrls);
+//     finalMessage += '\n\n$concatenatedUrls';
+//   }
+//   print('final message'); 
+//   print(finalMessage);
+//   print('??????????????<<<>><<>><<>>');
+//   return finalMessage;
+// }
+ 
+
+
+ 
+
+  // Future<void> sendMessage({String? chatRoomId, String? messageText,
+  //     String? otherUserId, BuildContext? context, bool? isStreamEmpty, List<String>? imagespaths} ) async {
+  //   try {
+  //     if (isStreamEmpty!) {
+  //       print('Stream is empty, creating new chat room...');
+  //       String chatroomid = await createChatRoom(
+  //           FirebaseAuth.instance.currentUser!.uid, otherUserId!);
+  //       print('New chatroom created with ID: $chatroomid');
+
+  //       FirebaseFirestore.instance.collection('messages').add(
+  //             ChatModel(
+  //               chatroomId: chatroomid,
+  //               senderId: FirebaseAuth.instance.currentUser!.uid,
+  //               text: messageText,
+  //               timestamp: DateTime.now(),
+  //               uid: otherUserId,
+  //             ).toJson(),
+  //           );
+  //       print('Message sent to new chat room.');
+  //     } else {
+  //       print('Stream is not empty, sending message to existing chat room...');
+  //       FirebaseFirestore.instance.collection('messages').add(
+  //             ChatModel(
+  //               chatroomId: chatRoomId,
+  //               senderId: FirebaseAuth.instance.currentUser!.uid,
+  //               text: messageText,
+  //               timestamp: DateTime.now(),
+  //               uid: otherUserId,
+  //             ).toJson(),
+  //           );
+  //       print('Message sent to existing chat room.');
+  //     }
+  //   } catch (e) {
+  //     print("Error sending message: $e");
+  //   }
+  // }
 
   Future<void> updateOnlineLastSeen(
       bool onlineStatus, Timestamp lastSeen) async {

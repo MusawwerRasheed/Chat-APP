@@ -1,5 +1,6 @@
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
+import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
@@ -14,10 +15,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_app/Domain/Models/users_model.dart';
+import 'package:chat_app/Domain/Models/users_model.dart'; 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
- 
 
 class Home extends StatefulWidget {
   final User? currentUser;
@@ -36,18 +36,20 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-
     super.initState();
+
     currentUser = FirebaseAuth.instance.currentUser;
     searchValueNotifier = ValueNotifier<String>('');
     userSearchController = TextEditingController();
     context.read<ChatUsersCubit>().getChatUsers();
-    context.read<UsersCubit>().getUsers('', FirebaseAuth.instance.currentUser!.uid);
-    context.read<OnlineStatusCubit>().updateOlineStatusLastSeen(true, Timestamp.now());
-
+    context
+        .read<UsersCubit>()
+        .getUsers('', FirebaseAuth.instance.currentUser!.uid);
+    context
+        .read<OnlineStatusCubit>()
+        .updateOlineStatusLastSeen(true, Timestamp.now());
   }
- 
-   
+
   buildPopupMenu() {
     showMenu(
       context: context,
@@ -67,16 +69,16 @@ class _HomeState extends State<Home> {
       if (selectedValue != null) {
         switch (selectedValue) {
           case 'logout':
-            context.read<OnlineStatusCubit>().updateOlineStatusLastSeen(false, Timestamp.now());
+            context
+                .read<OnlineStatusCubit>()
+                .updateOlineStatusLastSeen(false, Timestamp.now());
             HomeController().signOut(context);
-            
+
             break;
         }
       }
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +138,8 @@ class _HomeState extends State<Home> {
                                     return matches;
                                   },
                                   onSelected: (String value) {
-                                    context.read<UsersCubit>().getUsers(value, FirebaseAuth.instance.currentUser!.uid);
+                                    context.read<UsersCubit>().getUsers(value,
+                                        FirebaseAuth.instance.currentUser!.uid);
                                     var selectedUser = state.users.firstWhere(
                                       (user) => user.displayName == value,
                                     );
@@ -151,10 +154,10 @@ class _HomeState extends State<Home> {
                                 ),
                               );
                             } else {
-                              context.read<UsersCubit>().getUsers("", FirebaseAuth.instance.currentUser!.uid);
-                              return  SizedBox(
-                                  width: 230.w,
-                                   child: Text('loading... '));
+                              context.read<UsersCubit>().getUsers(
+                                  "", FirebaseAuth.instance.currentUser!.uid);
+                              return SizedBox(
+                                  width: 230.w, child: Text('loading... '));
                             }
                           },
                         ),
@@ -187,8 +190,7 @@ class _HomeState extends State<Home> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    const SizedBox(height: 20),
+                    30.y,
                     CustomText(
                       customText: 'Messages',
                       textStyle: Styles.plusJakartaSans(
@@ -242,12 +244,11 @@ class _HomeState extends State<Home> {
               ),
             ),
           ),
+        
         ],
       ),
     );
   }
-
-
 
   @override
   void dispose() {
@@ -255,4 +256,6 @@ class _HomeState extends State<Home> {
     searchValueNotifier.dispose();
     userSearchController.dispose();
   }
+
+  
 }

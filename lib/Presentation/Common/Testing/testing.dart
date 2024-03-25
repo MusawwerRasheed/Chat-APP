@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp1());
-
+ 
 class MyApp1 extends StatelessWidget {
+  ValueNotifier<int> vaalue = ValueNotifier(3);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

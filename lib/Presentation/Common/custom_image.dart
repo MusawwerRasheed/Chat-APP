@@ -9,7 +9,9 @@ class CustomImage extends StatelessWidget {
   final double? height;
   final double? width;
   final BoxFit? fit;
+  
   const CustomImage({
+
     required this.isAssetImage,
     this.fit,
     this.width,
@@ -29,7 +31,8 @@ class CustomImage extends StatelessWidget {
             fit: fit ?? BoxFit.fill,
             width: width,
           )
-        : Image.network(
+        :
+         Image.network(
             imageUrl ?? '',
             height: height ?? 800.h,
             fit: fit ?? BoxFit.fill,

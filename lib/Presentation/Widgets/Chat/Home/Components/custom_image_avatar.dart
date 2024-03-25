@@ -1,80 +1,120 @@
-import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
-import 'package:chat_app/Data/DataSource/Resources/styles.dart';
+import 'package:chat_app/Application/Services/ConnectivityServices/connectivity_service.dart';
+import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+ 
 
-class CustomImageAvatar extends StatelessWidget {
+ 
+
+class CustomImageAvatar extends StatefulWidget {
   final bool? isForSearch;
-  const CustomImageAvatar({
-    super.key,
+  final UserModel user;
+
+  CustomImageAvatar({
+    Key? key,
     required this.user,
     this.isForSearch,
-  });
+  }) : super(key: key);
 
-  final UserModel user;
+  @override
+  State<CustomImageAvatar> createState() => _CustomImageAvatarState();
+}
+
+class _CustomImageAvatarState extends State<CustomImageAvatar> {
+  ValueNotifier<bool> isConnected = ValueNotifier(false);
+
+  @override
+  void initState() {
+    super.initState();
+    checkConnectivity();
+  }
+
+  checkConnectivity() {
+    print('>>>>');
+    print('first here ');
+    print(isConnected.value);
+
+    AppConnectivity().connectionChanged().then(
+      (value) => setState(() {
+        isConnected.value = value;
+      }),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        user.imageUrl == ''
+        widget.user.imageUrl!.isEmpty || !isConnected.value
             ? Container(
-                width: isForSearch == true ? 30 : 50.w,
-                height: isForSearch == true ? 30 : 50.h,
+                width: widget.isForSearch == true ? 30 : 50,
+                height: widget.isForSearch == true ? 30 : 50,
                 decoration: BoxDecoration(
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Center(
                   child: CustomText(
-                    customText:
-                        user.displayName != null && user.displayName!.isNotEmpty
-                            ? user.displayName![0].toUpperCase()
-                            : "",
+                    customText: widget.user.displayName != null &&
+                            widget.user.displayName!.isNotEmpty
+                        ? widget.user.displayName![0].toUpperCase()
+                        : "",
                     textStyle: TextStyle(
                       color: Colors.white,
-                      fontSize: isForSearch == true ? 10 : 17,
+                      fontSize: widget.isForSearch == true ? 10 : 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               )
             : ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: CustomImage(
-                  isAssetImage: false,
-                  imageUrl: user.imageUrl,
-                  width: isForSearch! ? 30 : 53.w,
-                  height: isForSearch == true ? 30 : 53.h,
-                ),
-              ),
-        10.x,
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomText(
-              customText: user.displayName!,
-              textStyle: Styles.plusJakartaSans(
-                context,
-                fontSize: isForSearch == true ? 13 : 21,
-                fontWeight: FontWeight.bold,
+              borderRadius: BorderRadius.circular(30),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: isConnected,
+                builder: (context, connected, child) {
+                  return connected 
+                      ? CustomImage(
+                          isAssetImage: false,
+                          imageUrl: widget.user.imageUrl,
+                          width: widget.isForSearch! ? 30 : 53,
+                          height: widget.isForSearch == true ? 30 : 53,
+                        )
+                      : CustomImage(
+                          isAssetImage: true,
+                          imageUrl: Assets.googlelogo,
+                          width: widget.isForSearch! ? 30 : 53,
+                          height: widget.isForSearch == true ? 30 : 53,
+                        );
+                },
               ),
             ),
-            isForSearch == false
-                ? CustomText(
-                    customText: '',
-                    textStyle: Styles.plusJakartaSans(
-                      context,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  )
-                : Container(),
-          ],
+        SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomText(
+                customText: widget.user.displayName ?? "",
+                textStyle: TextStyle(
+                  fontSize: widget.isForSearch == true ? 13 : 21,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (widget.isForSearch == false)
+                const CustomText(
+                  customText: '',
+                  textStyle: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w300,
+                  ),
+                )
+              else
+                Container(),
+            ],
+          ),
         ),
       ],
     );
