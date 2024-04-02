@@ -1,6 +1,7 @@
 import 'package:chat_app/Application/Providers/app_providers.dart';
 import 'package:chat_app/Presentation/Common/Testing/testing.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_screen.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -38,9 +39,9 @@ splitScreenMode: true,
           home: 
           // MyApp1(),
           // MyHomePage(title: 'sldfjsldk',),
-
-           FirebaseAuth.instance.currentUser !=null?
+                    FirebaseAuth.instance.currentUser !=null?
           Home(currentUser: FirebaseAuth.instance.currentUser!,):const LoginScreen(),
+
         );
       },
     );

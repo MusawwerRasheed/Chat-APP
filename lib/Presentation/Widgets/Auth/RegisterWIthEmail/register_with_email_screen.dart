@@ -5,7 +5,7 @@ import 'package:chat_app/Presentation/Common/custom_button.dart';
 import 'package:chat_app/Presentation/Common/custom_textfield.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_states.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_appbar.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/custom_appbar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

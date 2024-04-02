@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
  
@@ -44,9 +45,9 @@ class UserModel {
         displayName: json["displayName"],
         email: json["email"],
         imageUrl: json["imageUrl"],
-        uid: json["uid"],
+      uid: json["uid"],
         isTyping: json["isTyping"],
-        isOnline: json["isOnline"],
+        isOnline: json["isOnline"], 
         lastSeen: json["lastSeen"],
 
       );
@@ -73,8 +74,6 @@ class UserModel {
      
      );
   }
-
-  
 }
  
  

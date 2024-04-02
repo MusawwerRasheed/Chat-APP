@@ -18,7 +18,6 @@ class LoginScreen extends StatefulWidget {
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
-  
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -69,13 +68,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   context.to(RegisterWithEmail());
                 },
                 style: ElevatedButton.styleFrom(
-                  elevation: 2,  
-                  minimumSize: Size(200.w, 50.h),  
+                  elevation: 2,
+                  minimumSize: Size(200.w, 50.h),
                 ),
                 child: CustomText(customText: 'SIgn up with Email'),
               ),
             ),
-            10.y, 
+            10.y,
             Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -130,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: AlertDialog(
                   content: Container(
                     height: 40.h,
-                    child: const Center(
+                    child: Center(
                       child: CustomText(customText: 'No user selecetd'),
                     ),
                   ),

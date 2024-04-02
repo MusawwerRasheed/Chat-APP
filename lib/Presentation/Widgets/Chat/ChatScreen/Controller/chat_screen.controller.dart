@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+ import 'package:intl/intl.dart';
 
 class ChatScreenController {
   final ScrollController? scrollController;
@@ -43,6 +45,22 @@ class ChatScreenController {
   
   }
 
+
+ 
+ 
+
+static String formatDateTime(Timestamp timestamp) {
+  
+  int milliseconds = timestamp.millisecondsSinceEpoch;
+
+  DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(milliseconds);
+
+  DateFormat formatter = DateFormat('hh:mm a--- MM-dd-yy');
+  
+  String formatted = formatter.format(dateTime);
+
+  return formatted;
+}
 
   
 }

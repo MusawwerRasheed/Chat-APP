@@ -1,28 +1,21 @@
 import 'dart:async';
-import 'package:chat_app/Data/Repository/OnlineStatusRepository/online_status_repo.dart';
+import 'package:chat_app/Data/Repository/ChatRepository/OnlineStatusRepository/online_status_repo.dart';
 import 'package:chat_app/Domain/Models/chat_model.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatCubit/online_status_state.dart';
+// import 'package:chat_app/Presentation/Widgets/Chat/ChatCubit/online_status_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
- 
-class OnlineStatusCubit extends Cubit<OnlineStatusLastSeenState> {
-  
-  OnlineStatusCubit() : super(OnlineInitialState());
+class OnlineStatusCubit extends Cubit {
+  OnlineStatusCubit() : super(());
 
-  Future<void> updateOlineStatusLastSeen(bool isOnline, Timestamp lastSeen) async {
-
-    emit(OnlineInitialState());
-
+  Future<void> updateOlineStatusLastSeen(
+      bool isOnline, Timestamp lastSeen) async {
     try {
-OnlineStatusRepo().updateOnlineStatusLastSeen(isOnline,lastSeen); 
-      
-  } catch (e) {
-       
+      OnlineStatusRepo().updateOnlineStatusLastSeen(isOnline, lastSeen);
+    } catch (e) {
       print('error in online status cubit');
     }
   }
- 
 }
 
 

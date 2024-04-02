@@ -3,7 +3,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
  
 
 class AppConnectivity {
+ 
   Future<bool> connectionChanged() async {
+     print('<<<<<<<<<'); 
     var connectivityResult = await Connectivity().checkConnectivity();
     print('CONNECTIVITY: $connectivityResult');
    
