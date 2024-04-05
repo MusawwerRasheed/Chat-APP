@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:chat_app/Data/Repository/ChatRepository/OnlineStatusRepository/online_status_repo.dart';
-import 'package:chat_app/Domain/Models/chat_model.dart';
-// import 'package:chat_app/Presentation/Widgets/Chat/ChatCubit/online_status_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

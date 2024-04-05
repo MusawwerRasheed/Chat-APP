@@ -1,8 +1,8 @@
-import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quick_router/quick_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -17,10 +17,7 @@ class HomeController {
     try {
       await _auth.signOut();
       await _googleSignIn.signOut();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      context.to(LoginScreen());
     } catch (error) {
       print('Error signing out: $error');
     }
@@ -46,7 +43,7 @@ class HomeController {
   static String formatMessageSend(Timestamp timestamp) {
     Duration difference =
         Timestamp.now().toDate().difference(timestamp.toDate());
-    if (difference.inSeconds < 40) {
+    if (difference.inSeconds < 10) {
       return 'just now';
     } else if (difference.inMinutes < 60) {
       return '${difference.inMinutes}m ago';
@@ -55,7 +52,6 @@ class HomeController {
     } else if (difference.inDays < 10) {
       return '${difference.inDays}D ago';
     }
-
 
     {
       return '${timestamp.toDate()}';

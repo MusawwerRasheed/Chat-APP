@@ -1,7 +1,6 @@
 import 'package:chat_app/Data/Repository/AuthRepository/auth_repository.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_states.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/Controller/register_with_email_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterWithEmailCubit extends Cubit<RegisterWithEmailState> {
@@ -19,7 +18,6 @@ class RegisterWithEmailCubit extends Cubit<RegisterWithEmailState> {
       return value;
     });
 
-    // emit(LoadedRegisterwithEmailState(user));
   }
 
   @override

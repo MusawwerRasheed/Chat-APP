@@ -1,6 +1,7 @@
  
 import 'package:flutter/material.dart';
 class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
+
   final Color? backgroundcolor;
   final Widget? leading;
   final bool? autoImply;
@@ -8,7 +9,7 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
   final bool? titleCentered;
   final Widget widget;
 
-  const CustomAppbar({
+   const CustomAppbar({
     Key? key,
     required this.widget,
     this.titleCentered,
@@ -17,6 +18,8 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundcolor,
     this.autoImply,
   }) : super(key: key);
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,7 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(100),
                 ),
-                child: Icon(Icons.arrow_back),
+                child: const Icon(Icons.arrow_back),
               ),
             ),
           ),
@@ -46,5 +49,5 @@ class CustomAppbar extends StatelessWidget implements PreferredSizeWidget {
   }
  
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

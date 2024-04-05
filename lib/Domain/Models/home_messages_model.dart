@@ -15,6 +15,7 @@ class HomeMessagesModel {
   final String? chatUid;
   final String? type;
   final bool? seen;
+  final int? count;
   final String? lastMessage;
   final String? latestMessageType;
   final Timestamp? timestamp;
@@ -25,6 +26,7 @@ class HomeMessagesModel {
     this.imageUrl,
     this.uid,
     this.isTyping,
+    this.count,
     this.isOnline,
     this.lastSeen,
     this.chatroomId,
@@ -58,9 +60,10 @@ class HomeMessagesModel {
         chatUid: json["chatUid"],
         type: json["type"],
         seen: json['seen'],
+        count: json['count'],
         lastMessage: json['lastMessage'],
         latestMessageType: json['lastMessageType'],
-        timestamp: json["timestamp"]   ,
+        timestamp: json["timestamp"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -74,12 +77,12 @@ class HomeMessagesModel {
         "chatroomId": chatroomId,
         "senderId": senderId,
         "text": text,
+        "count": count,
         "chatUid": chatUid,
         "type": type,
         "seen": seen,
-        "lastMessage":lastMessage,
-        "lastMessageType":latestMessageType,
-        "timestamp": timestamp ,
+        "lastMessage": lastMessage,
+        "lastMessageType": latestMessageType,
+        "timestamp": timestamp,
       };
 }
- 

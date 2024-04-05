@@ -48,10 +48,8 @@ class FirestoreServices {
   }
 
   
-  
 
-  
-  static Future<List<HomeMessagesModel>> gethomeMessages() async {
+  static Stream<List<HomeMessagesModel>> gethomeMessages() async* {
     try {
       String currentUid = FirebaseAuth.instance.currentUser!.uid;
 
@@ -60,7 +58,7 @@ class FirestoreServices {
           .where('users', arrayContains: currentUid)
           .get();
 
-      Set<String> chatroomIds = {}; // Using a set to store unique chatroomIds
+      Set<String> chatroomIds = {};
 
       chatroomsSnapshot.docs.forEach((doc) {
         List<dynamic>? users = doc['users'];
@@ -71,7 +69,7 @@ class FirestoreServices {
         }
       });
 
-      List<HomeMessagesModel> users = [];
+      List<HomeMessagesModel> usersList = []; // List to accumulate users
 
       for (String chatroomId in chatroomIds) {
         print('Fetching latest message for chatroom ID: $chatroomId');
@@ -80,57 +78,76 @@ class FirestoreServices {
             .collection('messages')
             .where('chatroomId', isEqualTo: chatroomId)
             .orderBy('timestamp', descending: true)
-            .limit(1)
             .get();
 
         if (messagesQuerySnapshot.docs.isNotEmpty) {
-          var messageDoc = messagesQuerySnapshot.docs.first;
-          var messageData = messageDoc.data() as Map<String, dynamic>;
+          var messageDocs = messagesQuerySnapshot.docs;
+          var lastMessage = messageDocs.first.data() as Map<String, dynamic>;
 
-          String senderId = messageData['senderId'];
-          String type = messageData['type'];
-          String lastMessage = messageData['text'] ?? 'No messages yet'; // Default message
-          Timestamp timestamp = messageData['timestamp'];
-          bool seen = messageData['seen'] ?? false;
+          String senderId = lastMessage['senderId'];
+          String type = lastMessage['type'];
+          String text =
+              lastMessage['text'] ?? 'No messages yet'; // Default message
+          Timestamp timestamp = lastMessage['timestamp'];
+          bool seen = lastMessage['seen'] ?? false;
 
-          var userDoc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(senderId)
-              .get();
+          int count = messageDocs.where((doc) => doc['seen'] == false).length;
 
-          if (userDoc.exists) {
-            var userData = userDoc.data() as Map<String, dynamic>;
+          String otherUserId;
+          if (chatroomId.contains('_')) {
+            List<String> ids = chatroomId.split('_');
+            if (ids.length == 2 && ids.contains(currentUid)) {
+              otherUserId =
+                  ids.firstWhere((id) => id != currentUid, orElse: () => '');
+            } else {
+              otherUserId = senderId;
+            }
+          } else {
+            otherUserId = senderId;
+          }
 
-            HomeMessagesModel user = HomeMessagesModel(
-              displayName: userData['displayName'],
-              email: userData['email'],
-              imageUrl: userData['imageUrl'],
-              uid: userData['uid'],
-              isTyping: userData['isTyping'] ?? false,
-              isOnline: userData['isOnline'] ?? false,
-              lastSeen: userData['lastSeen'],
-              seen: seen,
-              senderId: senderId,
-              chatroomId: chatroomId,
-              type: type,
-              lastMessage: lastMessage,
-              timestamp: timestamp,
-              latestMessageType: type,
-            );
+          if (otherUserId.isNotEmpty) {
+            var userDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(otherUserId)
+                .get();
 
-            print('Sender ID: $senderId');
-            print('Type: $type');
-            print('Last Message: $lastMessage');
-            print('Timestamp: $timestamp');
-            print('Seen: $seen');
-            print('Created User: $user');
+            if (userDoc.exists) {
+              var userData = userDoc.data() as Map<String, dynamic>;
 
-            users.add(user);
+              HomeMessagesModel user = HomeMessagesModel(
+                displayName: userData['displayName'],
+                email: userData['email'],
+                imageUrl: userData['imageUrl'],
+                uid: userData['uid'],
+                isTyping: userData['isTyping'] ?? false,
+                isOnline: userData['isOnline'] ?? false,
+                lastSeen: userData['lastSeen'],
+                seen: seen,
+                senderId: senderId,
+                chatroomId: chatroomId,
+                type: type,
+                lastMessage: text,
+                timestamp: timestamp,
+                latestMessageType: type,
+                count: count,
+              );
+
+              print('Sender ID: $senderId');
+              print('Type: $type');
+              print('Last Message: $text');
+              print('Timestamp: $timestamp');
+              print('Seen: $seen');
+              print('Count: $count');
+              print('Created User: $user');
+
+              usersList.add(user);
+            }
           }
         }
       }
-
-      return users;
+      print(usersList);
+      yield usersList;  
     } catch (e) {
       print('Error getting chat users: $e');
       throw e;
@@ -139,103 +156,102 @@ class FirestoreServices {
  
 
 
-
-
-
-
-
   // static Future<List<HomeMessagesModel>> gethomeMessages() async {
   //   try {
   //     String currentUid = FirebaseAuth.instance.currentUser!.uid;
 
-  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //     QuerySnapshot chatroomsSnapshot = await FirebaseFirestore.instance
   //         .collection('chatrooms')
   //         .where('users', arrayContains: currentUid)
   //         .get();
 
-  //     List<String> userIds = [];
+  //     Set<String> chatroomIds = {}; // Using a set to store unique chatroomIds
 
-  //     querySnapshot.docs.forEach((doc) {
-  //       Map<String, dynamic>? chatroomData =
-  //           doc.data() as Map<String, dynamic>?;
+  //     chatroomsSnapshot.docs.forEach((doc) {
+  //       List<dynamic>? users = doc['users'];
 
-  //       if (chatroomData != null) {
-  //         List<dynamic>? users = chatroomData['users'];
-
-  //         if (users != null && users.isNotEmpty) {
-  //           String otherUsersIds = users.firstWhere(
-  //             (userId) => userId != currentUid,
-  //             orElse: () => '',
-  //           );
-
-  //           if (otherUsersIds.isNotEmpty) {
-  //             var chatExists = querySnapshot.docs.any((chat) =>
-  //                 (chat.data() as Map<String, dynamic>?)?['users']
-  //                         ?.contains(currentUid) ==
-  //                     true &&
-  //                 (chat.data() as Map<String, dynamic>?)?['users']
-  //                         ?.contains(otherUsersIds) ==
-  //                     true);
-
-  //             if (chatExists) {
-  //               userIds.add(otherUsersIds);
-  //             }
-  //           }
-  //         }
+  //       if (users != null && users.isNotEmpty) {
+  //         String chatroomId = doc.id;
+  //         chatroomIds.add(chatroomId);
   //       }
   //     });
 
-  //     QuerySnapshot usersQuerySnapshot = await FirebaseFirestore.instance
-  //         .collection('users')
-  //         .where(FieldPath.documentId, whereIn: userIds)
-  //         .get();
-
   //     List<HomeMessagesModel> users = [];
 
-  //     for (var userDoc in usersQuerySnapshot.docs) {
-  //       var userData = userDoc.data() as Map<String, dynamic>;
+  //     for (String chatroomId in chatroomIds) {
+  //       print('Fetching latest message for chatroom ID: $chatroomId');
 
-  //       QuerySnapshot chatsQuerySnapshot = await FirebaseFirestore.instance
+  //       QuerySnapshot messagesQuerySnapshot = await FirebaseFirestore.instance
   //           .collection('messages')
-  //           .where('uid', isEqualTo: userData['uid'])
+  //           .where('chatroomId', isEqualTo: chatroomId)
   //           .orderBy('timestamp', descending: true)
   //           .limit(1)
   //           .get();
 
-  //       var chatData = chatsQuerySnapshot.docs.isNotEmpty
-  //           ? chatsQuerySnapshot.docs.first.data() as Map<String, dynamic>
-  //           : null;
+  //       if (messagesQuerySnapshot.docs.isNotEmpty) {
+  //         var messageDoc = messagesQuerySnapshot.docs.first;
+  //         var messageData = messageDoc.data() as Map<String, dynamic>;
 
-  //       String? latestMessageType;
-  //       if (chatData != null) {
-  //         latestMessageType = chatData['type'];
-  //         bool seen = chatData['seen'];
+  //         String senderId = messageData['senderId'];
+  //         String type = messageData['type'];
+  //         String lastMessage =
+  //             messageData['text'] ?? 'No messages yet'; // Default message
+  //         Timestamp timestamp = messageData['timestamp'];
+  //         bool seen = messageData['seen'] ?? false;
 
-  //         print(chatData['senderId']);
-  //         print('{{{{}}}}');
+  //         String otherUserId;
+  //         if (chatroomId.contains('_')) {
+  //           List<String> ids = chatroomId.split('_');
+  //           if (ids.length == 2 && ids.contains(currentUid)) {
+  //             otherUserId =
+  //                 ids.firstWhere((id) => id != currentUid, orElse: () => '');
+  //           } else {
+  //             otherUserId = senderId;
+  //           }
+  //         } else {
+  //           otherUserId = senderId;
+  //         }
 
-  //         // Hey chatgpt this chatData['lastMessage'] is printing null.
-  //         print(chatData['lastMessage']);
+  //         if (otherUserId.isNotEmpty) {
+  //           print('Other User ID: $otherUserId');
+  //           print('Current User ID: $currentUid');
+
+  //           var userDoc = await FirebaseFirestore.instance
+  //               .collection('users')
+  //               .doc(otherUserId)
+  //               .get();
+
+  //           if (userDoc.exists) {
+  //             var userData = userDoc.data() as Map<String, dynamic>;
+
+  //             HomeMessagesModel user = HomeMessagesModel(
+  //               displayName: userData['displayName'],
+  //               email: userData['email'],
+  //               imageUrl: userData['imageUrl'],
+  //               uid: userData['uid'],
+  //               isTyping: userData['isTyping'] ?? false,
+  //               isOnline: userData['isOnline'] ?? false,
+  //               lastSeen: userData['lastSeen'],
+  //               seen: seen,
+  //               senderId: senderId,
+  //               chatroomId: chatroomId,
+  //               type: type,
+  //               lastMessage: lastMessage,
+  //               timestamp: timestamp,
+  //               latestMessageType: type,
+  //             );
+
+  //             print('Sender ID: $senderId');
+  //             print('Type: $type');
+  //             print('Last Message: $lastMessage');
+  //             print('Timestamp: $timestamp');
+  //             print('Seen: $seen');
+  //             print('Created User: $user');
+
+  //             users.add(user);
+  //           }
+  //         }
   //       }
-
-  //       users.add(
-  //         HomeMessagesModel(
-  // displayName: userData['displayName'],
-  // email: userData['email'],
-  // imageUrl: userData['imageUrl'],
-  // uid: userData['uid'],
-  // isTyping: userData['isTyping'] ?? false,
-  // isOnline: userData['isOnline'] ?? false,
-  // lastSeen: userData['lastSeen'],
-  // seen: chatData!['seen'],
-  // senderId: chatData['senderId'],
-  // chatroomId: chatData != null ? chatData['chatroomId'] : null,
-  // type: chatData != null ? chatData['type'] : null,
-  // lastMessage: chatData != null ? chatData['text'] : null,
-  // timestamp: chatData != null ? chatData['timestamp'] : null,
-  // latestMessageType: latestMessageType,
-  //         ),
-  //       );
   //     }
 
   //     return users;
@@ -455,7 +471,6 @@ class FirestoreServices {
     } catch (e) {
       print('Error uploading images: $e');
     }
-
     return imageUrls;
   }
 

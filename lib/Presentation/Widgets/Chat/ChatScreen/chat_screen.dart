@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
-import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/Repository/ChatRepository/chat_repository.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
@@ -12,21 +11,23 @@ import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatCubit/MessageSeen/message_seen_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/MessageSeen/message_seen_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Components/custom_chat_text_field.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Components/custom_list_tile.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/chat_screen.controller.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/AppbarCubit/appbar_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/AppbarCubit/appbar_states.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/Controller/appbar_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/Controller/appbar_states.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/custom_appbar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/HomeMessages/HomeMessagesCubit/home_messages_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class ChatScreen extends StatefulWidget {
+
+ 
+ 
+ class ChatScreen extends StatefulWidget {
   final String? chatRoomId;
   final String otherUserId;
 
@@ -101,7 +102,11 @@ class ChatScreenState extends State<ChatScreen> {
     initChatStream();
   }
 
+
+
   bool isBottomContainerVisible = false;
+
+
 
   void initChatStream() async {
     try {
@@ -119,10 +124,14 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
+ 
+
   void updateTypingStatus(bool isTyping) {
     IsTypingRepository()
         .updateTypingStatus(FirebaseAuth.instance.currentUser!.uid, isTyping);
   }
+
+
 
   final _debouncer = Debouncer(milliseconds: 500);
 
@@ -238,365 +247,356 @@ class ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
-      body: WillPopScope(
-        onWillPop: () async {
-          context.read<HomeMessagesCubit>().getHomeMessages();
-          return true;
-        },
-        child: Stack(
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: ValueListenableBuilder<List<ChatModel>>(
-                    valueListenable: chatMessagesNotifier,
-                    builder: (context, chatMessages, _) {
-                      return ListView.builder(
-                        controller: scrollController,
-                        reverse: true,
-                        itemCount: chatMessages.length,
-                        itemBuilder: (context, index) {
-                          var message = chatMessages[index];
-                          if (message.type == 'text' && message.type != null) {
-                            return CustomListTile(message: message);
-                          } else {
-                            return FutureBuilder<List<String>>(
-                              future: deconcatinateAsync(message.text),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<List<String>> snapshot) {
-                                if (snapshot.hasError) {
-                                  return Text('Error: ${snapshot.error}');
-                                } else {
-                                  List<String>? newImagePaths = snapshot.data;
-                                  if (newImagePaths != null &&
-                                      newImagePaths.isNotEmpty) {
-                                    return Stack(
-                                      children: [
-                                        Container(
-                                          margin: message.senderId ==
-                                                  FirebaseAuth
-                                                      .instance.currentUser!.uid
-                                              ? const EdgeInsets.only(
-                                                  left: 90,
-                                                  top: 10,
-                                                  bottom: 10,
-                                                  right: 05)
-                                              : const EdgeInsets.only(
-                                                  right: 90,
-                                                  top: 10,
-                                                  bottom: 0,
-                                                  left: 20),
-                                          padding: EdgeInsets.all(3),
-                                          decoration: BoxDecoration(
-                                            color: message.senderId ==
-                                                    FirebaseAuth.instance
-                                                        .currentUser!.uid
-                                                ? AppColors.blue
-                                                : AppColors.grey,
-                                            borderRadius:
-                                                BorderRadius.circular(10),
+      body: Stack(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ValueListenableBuilder<List<ChatModel>>(
+                  valueListenable: chatMessagesNotifier,
+                  builder: (context, chatMessages, _) {
+                    return ListView.builder(
+                      controller: scrollController,
+                      reverse: true,
+                      itemCount: chatMessages.length,
+                      itemBuilder: (context, index) {
+                        var message = chatMessages[index];
+                        if (message.type == 'text' && message.type != null) {
+                          return CustomListTile(message: message);
+                        } else {
+                          return FutureBuilder<List<String>>(
+                            future: deconcatinateAsync(message.text),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<List<String>> snapshot) {
+                              if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                List<String>? newImagePaths = snapshot.data;
+                                if (newImagePaths != null &&
+                                    newImagePaths.isNotEmpty) {
+                                  return Stack(
+                                    children: [
+                                      Container(
+                                        margin: message.senderId ==
+                                                FirebaseAuth
+                                                    .instance.currentUser!.uid
+                                            ? const EdgeInsets.only(
+                                                left: 90,
+                                                top: 10,
+                                                bottom: 10,
+                                                right: 05)
+                                            : const EdgeInsets.only(
+                                                right: 90,
+                                                top: 10,
+                                                bottom: 0,
+                                                left: 20),
+                                        padding: EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          color: message.senderId ==
+                                                  FirebaseAuth.instance
+                                                      .currentUser!.uid
+                                              ? AppColors.blue
+                                              : AppColors.grey,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: GridView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: newImagePaths.length,
+                                          gridDelegate:
+                                              SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount:
+                                                newImagePaths.length > 1
+                                                    ? 2
+                                                    : 1,
+                                            crossAxisSpacing: 5.0,
+                                            mainAxisSpacing: 5.0,
                                           ),
-                                          child: GridView.builder(
-                                            shrinkWrap: true,
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            itemCount: newImagePaths.length,
-                                            gridDelegate:
-                                                SliverGridDelegateWithFixedCrossAxisCount(
-                                              crossAxisCount:
-                                                  newImagePaths.length > 1
-                                                      ? 2
-                                                      : 1,
-                                              crossAxisSpacing: 5.0,
-                                              mainAxisSpacing: 5.0,
-                                            ),
-                                            itemBuilder: (context, index) {
-                                              if (index ==
-                                                      newImagePaths.length -
-                                                          1 &&
-                                                  isLoadingImage) {
-                                                return const CircularProgressIndicator();
-                                              } else {
-                                                return GestureDetector(
-                                                  onTap: () {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return Dialog(
-                                                          child: Image.network(
-                                                            newImagePaths[
-                                                                index],
-                                                            fit: BoxFit.fill,
-                                                            width: 00,
-                                                            height: 500,
-                                                          ),
-                                                        );
-                                                      },
-                                                    );
-                                                  },
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.grey
-                                                              .withOpacity(0.5),
-                                                          spreadRadius: 2,
-                                                          blurRadius: 5,
-                                                          offset: Offset(0, 3),
+                                          itemBuilder: (context, index) {
+                                            if (index ==
+                                                    newImagePaths.length -
+                                                        1 &&
+                                                isLoadingImage) {
+                                              return const CircularProgressIndicator();
+                                            } else {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext
+                                                        context) {
+                                                      return Dialog(
+                                                        child: Image.network(
+                                                          newImagePaths[
+                                                              index],
+                                                          fit: BoxFit.fill,
+                                                          width: 00,
+                                                          height: 500,
                                                         ),
-                                                      ],
-                                                    ),
-                                                    child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                      child: Image.network(
-                                                        newImagePaths[index],
-                                                        fit: BoxFit.cover,
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withOpacity(0.5),
+                                                        spreadRadius: 2,
+                                                        blurRadius: 5,
+                                                        offset: Offset(0, 3),
                                                       ),
+                                                    ],
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    child: Image.network(
+                                                      newImagePaths[index],
+                                                      fit: BoxFit.cover,
                                                     ),
                                                   ),
-                                                );
-                                              }
-                                            },
-                                          ),
+                                                ),
+                                              );
+                                            }
+                                          },
                                         ),
-                                        Positioned(
-                                          bottom: 14,
-                                          right: message.senderId ==
-                                                  FirebaseAuth
-                                                      .instance.currentUser!.uid
-                                              ? 15
-                                              : null,
-                                          left: message.senderId ==
-                                                  FirebaseAuth
-                                                      .instance.currentUser!.uid
-                                              ? null
-                                              : 30,
-                                          child: Row(
-                                            children: [
-                                              CustomText(
-                                                customText: HomeController
-                                                    .formatMessageSend(
-                                                        message.timestamp!),
-                                                textStyle:
-                                                    Styles.smallPlusJakartaSans(
-                                                  context,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w300,
-                                                  color: Colors.white,
-                                                ),
+                                      ),
+                                      Positioned(
+                                        bottom: 14,
+                                        right: message.senderId ==
+                                                FirebaseAuth
+                                                    .instance.currentUser!.uid
+                                            ? 15
+                                            : null,
+                                        left: message.senderId ==
+                                                FirebaseAuth
+                                                    .instance.currentUser!.uid
+                                            ? null
+                                            : 30,
+                                        child: Row(
+                                          children: [
+                                            CustomText(
+                                              customText: HomeController
+                                                  .formatMessageSend(
+                                                      message.timestamp!),
+                                              textStyle:
+                                                  Styles.smallPlusJakartaSans(
+                                                context,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w300,
+                                                color: Colors.white,
                                               ),
-                                              const SizedBox(width: 20),
-                                              Visibility(
-                                                visible: message.senderId ==
-                                                        FirebaseAuth.instance
-                                                            .currentUser!.uid
-                                                    ? true
-                                                    : false,
-                                                child: Icon(
-                                                  Icons.done_all_rounded,
-                                                  color: message.seen ?? false
-                                                      ? Colors.blue
-                                                      : Colors.grey,
-                                                ),
+                                            ),
+                                            const SizedBox(width: 20),
+                                            Visibility(
+                                              visible: message.senderId ==
+                                                      FirebaseAuth.instance
+                                                          .currentUser!.uid
+                                                  ? true
+                                                  : false,
+                                              child: Icon(
+                                                Icons.done_all_rounded,
+                                                color: message.seen ?? false
+                                                    ? Colors.blue
+                                                    : Colors.grey,
                                               ),
-                                            ],
-                                          ),
-                                        )
-                                      ],
-                                    );
-                                  } else {
-                                    return const SizedBox.shrink();
-                                  }
-                                }
-                              },
-                            );
-                          }
-                        },
-                      );
-                    },
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 10, bottom: 20),
-                        height: 51.h,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent!,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: CustomChatTextField(
-                          onChangedFunction: (text) {
-                            updateTypingStatus(true);
-                            _debouncer.run(() {
-                              updateTypingStatus(false);
-                            });
-                          },
-                          inputColor: Colors.black,
-                          fontSize: 12,
-                          iconColor: Colors.grey,
-                          suffix: const Icon(Icons.image,
-                              color: AppColors.lightGrey),
-                          suffixFunction: () {
-                            ChatScreenController()
-                                .pickImages(context)
-                                .then((value) {
-                              List<String> newImages = [];
-
-                              for (var imagePath in value) {
-                                if (!imagePaths.contains(imagePath)) {
-                                  newImages.add(imagePath);
-                                  imagePaths.clear();
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
                                 }
                               }
-
-                              imagePaths.addAll(newImages);
-
-                              showDialog(
-                                  context: context,
-                                  builder: ((context) {
-                                    return Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Center(
-                                          child: Container(
-                                            height: 300,
-                                            width: 350,
-                                            child: GridView.builder(
-                                                itemCount: imagePaths.length,
-                                                gridDelegate:
-                                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                                        crossAxisCount: 1),
-                                                itemBuilder: (context, index) {
-                                                  final imagePath =
-                                                      imagePaths[index];
-                                                  return Image.file(
-                                                      File(imagePath));
-                                                }),
-                                          ),
-                                        ),
-                                        ElevatedButton(
-                                          style: ButtonStyle(
-                                              backgroundColor:
-                                                  MaterialStateProperty.all(
-                                                      AppColors.blue)),
-                                          child: const Icon(
-                                            Icons.send,
-                                            color: AppColors.white,
-                                          ),
-                                          onPressed: () {
-                                            FirestoreServices().sendMessage(
-                                              chatRoomId: widget.chatRoomId,
-                                              otherUserId: widget.otherUserId,
-                                              context: context,
-                                              imagePaths: imagePaths,
-                                              isStreamEmpty:
-                                                  isStreamEmpty.value,
-                                            );
-
-                                            initChatStream();
-
-                                            Navigator.pop(context);
-                                            context
-                                                .read<HomeMessagesCubit>()
-                                                .getHomeMessages();
-                                            inputController.clear();
-                                          },
-                                        )
-                                      ],
-                                    );
-                                  }));
-                            });
-                          },
-                          inputController: inputController,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        if (inputController.text.isNotEmpty) {
-                          FirestoreServices().sendMessage(
-                            chatRoomId: widget.chatRoomId,
-                            messageText: inputController.text,
-                            otherUserId: widget.otherUserId,
-                            context: context,
-                            isStreamEmpty: isStreamEmpty.value,
+                            },
                           );
-
-                          context.read<HomeMessagesCubit>().getHomeMessages();
-                          // initChatStream();
-                          inputController.clear();
                         }
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(
-                            bottom: 20, left: 10, right: 10),
-                        width: 50.w,
-                        height: 50.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: AppColors.blue,
-                        ),
-                        child: const Icon(
-                          Icons.send,
-                          color: AppColors.white,
-                        ),
+                    );
+                  },
+                ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 10, bottom: 20),
+                      height: 51.h,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent!,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: CustomChatTextField(
+                        onChangedFunction: (text) {
+                          updateTypingStatus(true);
+                          _debouncer.run(() {
+                            updateTypingStatus(false);
+                          });
+                        },
+                        inputColor: Colors.black,
+                        fontSize: 12,
+                        iconColor: Colors.grey,
+                        suffix: const Icon(Icons.image,
+                            color: AppColors.lightGrey),
+                        suffixFunction: () {
+                          ChatScreenController()
+                              .pickImages(context)
+                              .then((value) {
+                            List<String> newImages = [];
+      
+                            for (var imagePath in value) {
+                              if (!imagePaths.contains(imagePath)) {
+                                newImages.add(imagePath);
+                                imagePaths.clear();
+                              }
+                            }
+      
+                            imagePaths.addAll(newImages);
+      
+                            showDialog(
+                                context: context,
+                                builder: ((context) {
+                                  return Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: [
+                                      Center(
+                                        child: Container(
+                                          height: 300,
+                                          width: 350,
+                                          child: GridView.builder(
+                                              itemCount: imagePaths.length,
+                                              gridDelegate:
+                                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                                      crossAxisCount: 1),
+                                              itemBuilder: (context, index) {
+                                                final imagePath =
+                                                    imagePaths[index];
+                                                return Image.file(
+                                                    File(imagePath));
+                                              }),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all(
+                                                    AppColors.blue)),
+                                        child: const Icon(
+                                          Icons.send,
+                                          color: AppColors.white,
+                                        ),
+                                        onPressed: () {
+                                          FirestoreServices().sendMessage(
+                                            chatRoomId: widget.chatRoomId,
+                                            otherUserId: widget.otherUserId,
+                                            context: context,
+                                            imagePaths: imagePaths,
+                                            isStreamEmpty:
+                                                isStreamEmpty.value,
+                                          );
+      
+                                          initChatStream();
+      
+                                          Navigator.pop(context);
+                                           
+                                          inputController.clear();
+                                        },
+                                      )
+                                    ],
+                                  );
+                                }));
+                          });
+                        },
+                        inputController: inputController,
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-            Positioned(
-              top: 500,
-              left: 280,
-              child: GestureDetector(
-                onTap: () {
-                  ChatScreenController(scrollController: scrollController)
-                      .scrollToBottom();
-                },
-                child: Visibility(
-                  visible: isBottomContainerVisible,
-                  child: Container(
-                    color: Colors.transparent,
-                    height: 50,
-                    width: 50,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      if (inputController.text.isNotEmpty) {
+                        FirestoreServices().sendMessage(
+                          chatRoomId: widget.chatRoomId,
+                          messageText: inputController.text,
+                          otherUserId: widget.otherUserId,
+                          context: context,
+                          isStreamEmpty: isStreamEmpty.value,
+                        );
+       
+                        // initChatStream();
+                        inputController.clear();
+                      }
+                    },
                     child: Container(
+                      margin: const EdgeInsets.only(
+                          bottom: 20, left: 10, right: 10),
+                      width: 50.w,
+                      height: 50.h,
                       decoration: BoxDecoration(
-                        border: Border.all(),
-                        color: Colors.grey,
                         borderRadius: BorderRadius.circular(50),
+                        color: AppColors.blue,
                       ),
-                      height: 25,
-                      width: 25,
                       child: const Icon(
-                        Icons.arrow_downward,
+                        Icons.send,
                         color: AppColors.white,
-                        size: 20,
                       ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Positioned(
+            top: 500,
+            left: 280,
+            child: GestureDetector(
+              onTap: () {
+                ChatScreenController(scrollController: scrollController)
+                    .scrollToBottom();
+              },
+              child: Visibility(
+                visible: isBottomContainerVisible,
+                child: Container(
+                  color: Colors.transparent,
+                  height: 50,
+                  width: 50,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    height: 25,
+                    width: 25,
+                    child: const Icon(
+                      Icons.arrow_downward,
+                      color: AppColors.white,
+                      size: 20,
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   @override
   void dispose() {
-    chatMessagesNotifier.dispose();
+    // chatMessagesNotifier.dispose();
     scrollController.dispose();
     typingSubscription.cancel();
     super.dispose();

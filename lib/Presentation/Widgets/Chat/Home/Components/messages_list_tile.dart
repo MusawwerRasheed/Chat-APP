@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
  
 
 class MessagesListTile extends StatefulWidget {
+
+
   final Widget? leading;
   final Widget? title;
   final Widget? subTitle;
   final Widget? trailing;
   final bool? isThreeLines;
   final ListTileStyle? style;
+
 
   const MessagesListTile({
     super.key,
@@ -28,10 +31,10 @@ class _MessagesListTileState extends State<MessagesListTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: widget.leading ?? Icon(Icons.person),
-      title: widget.title ??  Text('asdlklkkj'),
-      subtitle: widget.subTitle ?? Text('asdfksjadlkfj'),
-      trailing: widget.trailing?? Text('adfasdf'),
+      leading: widget.leading ?? const Icon(Icons.person),
+      title: widget.title ??  const Text('a'),
+      subtitle: widget.subTitle ?? Text('a'),
+      trailing: widget.trailing?? Text('a'),
       isThreeLine: widget.isThreeLines?? false,
       style: widget.style ??  ListTileStyle.list,
     );

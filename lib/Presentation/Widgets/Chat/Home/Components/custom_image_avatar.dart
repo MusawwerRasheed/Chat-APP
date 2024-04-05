@@ -2,6 +2,7 @@ import 'package:chat_app/Application/Services/ConnectivityServices/connectivity_
 import 'package:flutter/material.dart';
 
 class CustomImageAvatar extends StatefulWidget {
+  
   String? imagePath;
   bool? isAssetImage;
   bool? isForSearch;

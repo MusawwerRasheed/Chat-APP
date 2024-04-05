@@ -3,12 +3,14 @@ import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/chat_screen.controller.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+  
+  
 class CustomListTile extends StatelessWidget {
   CustomListTile({
     super.key,
@@ -38,10 +40,12 @@ class CustomListTile extends StatelessWidget {
                             right: 120.sp, left: 5, bottom: 20, top: 15)
                         : EdgeInsets.only(
                             left: 150.sp, right: 3, bottom: 23, top: 15),
+                            
                 padding: EdgeInsets.only(
                   left: 10.sp,
                   top: 8.sp,
-                ),
+                 ),
+
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.r),
                   color:
@@ -55,7 +59,7 @@ class CustomListTile extends StatelessWidget {
                     right: 10,
                   ),
                   child: CustomText(
-                    customText: message.text!,
+                    customText: message.text??'sdf',
                     textStyle: Styles.plusJakartaSans(
                       context,
                       color: Colors.white,
@@ -64,6 +68,7 @@ class CustomListTile extends StatelessWidget {
                       letterSpacing: 1,
                     ),
                   ),
+                   
                 ),
               ),
               Positioned(
@@ -81,14 +86,14 @@ class CustomListTile extends StatelessWidget {
                         textStyle:
                             Styles.smallPlusJakartaSans(context, fontSize: 11,color: AppColors.blackColor ,  fontWeight: FontWeight.w200),
                         customText: HomeController.formatMessageSend(
-                            message.timestamp!)),
+                            message.timestamp?? Timestamp.now())),
                     10 .x,
                     Visibility(
                         visible: message.senderId == currentUid ? true : false,
                         child: Icon(
                           Icons.done_all,
-                          color:
-                              message.seen! ? AppColors.blue : AppColors.grey,
+                          color: 
+                              message.seen?? false?  AppColors.blue : AppColors.grey,
                         )),
                   ],
                 ),

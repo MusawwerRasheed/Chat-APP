@@ -1,25 +1,23 @@
-import 'dart:math';
-
+import 'package:chat_app/Application/Services/AppLifeCycleObserver/app_life_cycles.dart';
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
 import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
+import 'package:chat_app/Data/Repository/HomeMessagesRepository/home_messages_repository.dart';
+import 'package:chat_app/Domain/Models/home_messages_model.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatCubit/OnlineStatus/online_status_lastseen_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/OnlineStatus/online_status_lastseen_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/messages_list_tile.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/HomeMessages/HomeMessagesCubit/home_messages_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/HomeMessages/HomeMessagesCubit/home_messages_state.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_image_avatar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Users/UsersCubit/users_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Users/UsersCubit/users_state.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/Users/Controller/users_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/Users/Controller/users_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class Home extends StatefulWidget {
@@ -33,18 +31,35 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  ValueNotifier<List<HomeMessagesModel>> homeMessageNotifier =
+      ValueNotifier([]);
   late final User? currentUser;
   late final ValueNotifier<String> searchValueNotifier;
   late final TextEditingController userSearchController;
 
+  void initHomeMessagesStream() async {
+    try {
+      Stream<List<HomeMessagesModel>> homeMessagesStream =
+          HomeMessagesRepository.getHomeMessages();
+      homeMessagesStream.listen((homeMessages) {
+        homeMessageNotifier.value = homeMessages;
+      });
+    } catch (e) {
+      print('Error initializing chat stream: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    initHomeMessagesStream();
 
+    AppLifecycleObserver appLifecycleObserver =
+        AppLifecycleObserver(context: context);
     currentUser = FirebaseAuth.instance.currentUser;
     searchValueNotifier = ValueNotifier<String>('');
     userSearchController = TextEditingController();
-    context.read<HomeMessagesCubit>().getHomeMessages();
+
     context
         .read<UsersCubit>()
         .getUsers('', FirebaseAuth.instance.currentUser!.uid);
@@ -116,8 +131,6 @@ class _HomeState extends State<Home> {
                                   debounceDuration:
                                       const Duration(milliseconds: 500),
                                   itemBuilder: (context, suggestion) {
-                                    // In your original code, you were iterating over users for each suggestion, which is incorrect.
-                                    // You should directly display the suggestion passed here.
                                     if (suggestion is UserModel) {
                                       return ListTile(
                                         leading: CustomImageAvatar(
@@ -133,7 +146,7 @@ class _HomeState extends State<Home> {
                                         ),
                                       );
                                     }
-                                    // Handle other cases if needed
+
                                     return ListTile(
                                         title: Text(suggestion.toString()));
                                   },
@@ -165,7 +178,7 @@ class _HomeState extends State<Home> {
                                     "",
                                     FirebaseAuth.instance.currentUser!.uid,
                                   );
-                              return SizedBox(
+                              return const SizedBox(
                                 width: 230,
                                 child: Text('Loading...'),
                               );
@@ -211,142 +224,170 @@ class _HomeState extends State<Home> {
                         color: AppColors.blackColor,
                       ),
                     ),
-                    BlocBuilder<HomeMessagesCubit, HomeMessagesStates>(
-                      builder: (context, state) {
-                        if (state is LoadingHomeMessagesState) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        if (state is LoadedHomeMessageSate) {
-                          // print('home messages loaded');
-
-                          return Container(
-                            height: 500,
-                            child: ListView.separated(
-                              itemBuilder: (context, index) {
-                                final homeMessage = state.homeMessages[index];
-
-                                // //  print(' Testing >>>>> ');
-                                //  print(homeMessage.lastSeen);
-                                //  print(homeMessage.lastMessage);
-                                return GestureDetector(
-                                  onTap: () {
-                                    FirestoreServices().checkChatroom(
-                                      context,
-                                      FirebaseAuth.instance.currentUser!.uid,
-                                      homeMessage.uid!,
-                                    );
-                                  },
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: AppColors.white,
-                                          boxShadow: [
-                                            BoxShadow(
-                                                offset:
-                                                    Offset.fromDirection(9, 0),
-                                                spreadRadius: 0.1,
-                                                blurRadius: 1,
-                                                color: AppColors.grey),
-                                          ],
-                                        ),
-                                        height: 80,
-                                        width: 320,
-                                        child: MessagesListTile(
-                                          leading: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: CustomImageAvatar(
-                                              imagePath: homeMessage.imageUrl,
-                                              isAssetImage: false,
-                                              isForSearch: false,
-                                            ),
-                                          ),
-                                          title: CustomText(
-                                              customText:
-                                                  homeMessage.displayName!),
-                                          subTitle: Row(
-                                            children: [
-                                              Visibility(
-                                                visible: homeMessage.senderId ==
-                                                        FirebaseAuth.instance
-                                                            .currentUser!.uid
-                                                    ? true
-                                                    : false,
-                                                child: Icon(
-                                                  Icons.done_all_rounded,
-                                                  color:
-                                                      homeMessage.seen == true
-                                                          ? AppColors.blue
-                                                          : AppColors.grey,
-                                                ),
-                                              ),
-                                              10.x,
-                                              CustomText(overflow: TextOverflow.ellipsis,
-                                                  customText: homeMessage
-                                                              .latestMessageType ==
-                                                          'text'
-                                                      ? homeMessage
-                                                              .lastMessage ??
-                                                          'asd'
-                                                      : 'image'),
-                                            ],
-                                          ),
-                                          trailing: Column(
-                                            children: [
-                                              CustomText(
-                                                  customText: HomeController
-                                                          .formatMessageSend(
-                                                              homeMessage
-                                                                      .timestamp ??
-                                                                  Timestamp
-                                                                      .now()) ??
-                                                      ''),
-                                              10.y,
-                                              homeMessage.isOnline == true
-                                                  ? ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              50),
-                                                      child: Container(
-                                                        height: 10,
-                                                        width: 10,
-                                                        color:
-                                                            Colors.green[300],
-                                                      ),
-                                                    )
-                                                  : ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              40),
-                                                      child: Container(
-                                                        height: 10,
-                                                        width: 10,
-                                                        color: AppColors.grey,
-                                                      ),
-                                                    ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              separatorBuilder:
-                                  (BuildContext context, int index) {
-                                return const SizedBox(height: 20);
-                              },
-                              itemCount: state.homeMessages.length,
-                            ),
-                          );
-                        } else {
-                          return  Center(
+                    ValueListenableBuilder<List<HomeMessagesModel>>(
+                      valueListenable: homeMessageNotifier,
+                      builder: (context, homeMessages, _) {
+                        if (homeMessages.isEmpty) {
+                          return Center(
                               child: CustomText(customText: 'No Messages Yet'));
                         }
+
+                        return Container(
+                          height: 500,
+                          child: ListView.separated(
+                            itemBuilder: (context, index) {
+                              HomeMessagesModel homeMessage =
+                                  homeMessages[index];
+
+                              return GestureDetector(
+                                onTap: () {
+                                  FirestoreServices().checkChatroom(
+                                    context,
+                                    FirebaseAuth.instance.currentUser!.uid,
+                                    homeMessage.uid!,
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: AppColors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            offset: Offset.fromDirection(9, 0),
+                                            spreadRadius: 0.1,
+                                            blurRadius: 1,
+                                            color: AppColors.grey,
+                                          ),
+                                        ],
+                                      ),
+                                      height: 80,
+                                      width: 330,
+                                      child: MessagesListTile(
+                                        leading: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          child: CustomImageAvatar(
+                                            imagePath: homeMessage.imageUrl,
+                                            isAssetImage: false,
+                                            isForSearch: false,
+                                          ),
+                                        ),
+                                        title: Row(
+                                          children: [
+                                            CustomText(
+                                              textStyle: Styles.plusJakartaBold(
+                                                context,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                              customText:
+                                                  homeMessage.displayName!,
+                                            ),
+                                            7.x,
+                                            if (homeMessage.isOnline == true)
+
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(50),
+                                                child: Container(
+                                                  height: 10,
+                                                  width: 10,
+                                                  color: Colors.green[300],
+                                                ),
+                                              )
+                                            else
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(40),
+                                                child: Container(
+                                                  height: 10,
+                                                  width: 10,
+                                                  color: AppColors.grey,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                        subTitle: Row(
+                                          children: [
+                                            Visibility(
+                                              visible: homeMessage.senderId ==
+                                                  FirebaseAuth.instance
+                                                      .currentUser!.uid,
+                                              child: Icon(
+                                                Icons.done_all_rounded,
+                                                color: homeMessage.seen == true
+                                                    ? AppColors.blue
+                                                    : AppColors.grey,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            SizedBox(
+                                              width: 120,
+                                              child: CustomText(
+                                                overflow: TextOverflow.ellipsis,
+                                                customText: homeMessage
+                                                            .latestMessageType ==
+                                                        'text'
+                                                    ? homeMessage.lastMessage ??
+                                                        'asd'
+                                                    : 'image',
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        trailing: Column(
+                                          children: [
+                                            CustomText(
+                                              customText: HomeController
+                                                      .formatMessageSend(
+                                                    homeMessage.timestamp ??
+                                                        Timestamp.now(),
+                                                  ) ??
+                                                  '',
+                                            ),
+                                            const SizedBox(height: 10),
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                              child: Visibility(
+                                                visible: false,
+                                                child: Container(
+                                                  child: Center(
+                                                    child: CustomText(
+                                                      customText: '2',
+                                                      textStyle: Styles
+                                                          .largePlusJakartaSans(
+                                                        context,
+                                                        color: AppColors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  height: 20,
+                                                  width: 20,
+                                                  color: Colors.blueAccent,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) {
+                              return const SizedBox(height: 20);
+                            },
+                            itemCount: homeMessages.length,
+                          ),
+                        );
                       },
                     ),
                   ],

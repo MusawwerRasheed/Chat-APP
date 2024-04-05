@@ -1,6 +1,10 @@
 import 'package:chat_app/Application/Services/AuthServices/auth_services.dart';
 
 class AuthRepository {
+
+
+
+
   static Future getUser() async {
     try {
       return await Auth.googleSignin().then(
@@ -16,12 +20,16 @@ class AuthRepository {
     }
   }
 
+
+
   static Future loginWithEmail(String email, String password) async {
     return await Auth.loginWithEmail(email: email, password: password)
         .then((value) {
       return value;
     });
   }
+
+
 
 
   static Future registerWithEmail(
@@ -32,4 +40,6 @@ class AuthRepository {
       },
     );
   }
+
+  
 }

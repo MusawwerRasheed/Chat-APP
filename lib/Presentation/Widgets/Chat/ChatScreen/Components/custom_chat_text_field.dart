@@ -51,7 +51,7 @@ import 'package:flutter/material.dart';
                   onTap: suffixFunction,
                   child: suffix,
                 ),
-                border: InputBorder.none, // Remove TextField border
+                border: InputBorder.none,  
               ),
               controller: inputController,
             ),

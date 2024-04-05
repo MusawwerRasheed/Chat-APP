@@ -1,17 +1,15 @@
 import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
-import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
 import 'package:chat_app/Presentation/Common/custom_textfield.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/login_with_email_states.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/Controller/login_with_email_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/Controller/login_with_email_states.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/custom_appbar.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_quick_router/quick_router.dart';
 import 'dart:async';
 
 class LoginWithEmail extends StatefulWidget {

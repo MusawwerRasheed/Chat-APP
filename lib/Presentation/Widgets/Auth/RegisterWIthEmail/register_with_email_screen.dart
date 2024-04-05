@@ -3,15 +3,16 @@ import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/validator.dart';
 import 'package:chat_app/Presentation/Common/custom_button.dart';
 import 'package:chat_app/Presentation/Common/custom_textfield.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_states.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/custom_appbar.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/Controller/register_with_email_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/Controller/register_with_email_states.dart';
+import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/custom_appbar.dart'; 
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quick_router/quick_router.dart';
 
+ 
 class RegisterWithEmail extends StatefulWidget {
   const RegisterWithEmail({Key? key}) : super(key: key);
 
@@ -145,6 +146,7 @@ class _RegisterWithEmailState extends State<RegisterWithEmail> {
       context
           .read<RegisterWithEmailCubit>()
           .registerWithEmail(registrationData);
+         
 
       print('Full Name: $fullName');
       print('Email: $email');

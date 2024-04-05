@@ -1,7 +1,5 @@
-import 'package:chat_app/Application/Providers/app_providers.dart';
-import 'package:chat_app/Presentation/Common/Testing/testing.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_screen.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/chat_screen.dart';
+import 'package:chat_app/Application/Providers/app_providers.dart';  
+import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_screen.dart'; 
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,12 +10,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'firebase_options.dart';
 
 void main() async {
+   
+ 
+final BuildContext contextOfMain;
+ 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-
   FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.instance;
-  
+
   firebaseAppCheck.setTokenAutoRefreshEnabled(true);
 
   runApp(MultiBlocProvider(providers: appProviders, child: const MyApp()));
@@ -28,20 +29,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+ 
+   BuildContext anothercontext = context; 
+
     return ScreenUtilInit(
       minTextAdapt: true,
-splitScreenMode: true,
+      splitScreenMode: true,
       useInheritedMediaQuery: true,
       builder: (context, build) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Chat Now',
-          home: 
-          // MyApp1(),
-          // MyHomePage(title: 'sldfjsldk',),
-                    FirebaseAuth.instance.currentUser !=null?
-          Home(currentUser: FirebaseAuth.instance.currentUser!,):const LoginScreen(),
-
+          home:
+              // MyApp1(),
+              // MyHomePage(title: 'sldfjsldk',),
+              FirebaseAuth.instance.currentUser != null
+                  ? Home(
+                      currentUser: FirebaseAuth.instance.currentUser!,
+                    )
+                  : const LoginScreen(),
         );
       },
     );

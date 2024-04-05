@@ -2,10 +2,11 @@ import 'package:chat_app/Data/DataSource/Resources/assets.dart';
 import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/login_state.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/Controller/login_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/Controller/login_state.dart';
+
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/Login_with_email_screen.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_screen.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_screen.dart'; 
 import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  context.read<LoginCubit>().login();
+                  context.read<LoginCubit>().login(); 
                 },
                 style: ElevatedButton.styleFrom(
                   elevation: 2,

@@ -1,6 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 
- 
 
 class AppConnectivity {
  
@@ -16,31 +15,10 @@ class AppConnectivity {
       print('connected');
       return true;
     } else {
- 
       return true;  
-  
-    }
-    
+    } 
   }
- 
 } 
 
 
-
-// import 'package:connectivity_plus/connectivity_plus.dart';
-
-// class AppConnectivity {
-//   static void connectionChanged({
-//     void Function()? onDisconnected,
-//     void Function()? onConnected,
-//   }) {
-//     Connectivity().onConnectivityChanged.listen((result) {
-//       print('Connectivity: $result');
-//       if (result == ConnectivityResult.none) {
-//         onDisconnected?.call();
-//       } else {
-//         onConnected?.call();
-//       }
-//     });
-//   }
-// }
+ 
