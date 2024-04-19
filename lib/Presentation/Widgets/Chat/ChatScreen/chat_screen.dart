@@ -15,10 +15,11 @@ import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/Message
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Components/custom_chat_text_field.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Components/custom_list_tile.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/chat_screen.controller.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/Controller/appbar_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/Controller/appbar_states.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/custom_appbar.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/CustomAppbar/Controller/appbar_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/CustomAppbar/Controller/appbar_states.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/CustomAppbar/custom_appbar.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Controller/home_controller.dart';
+ 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

@@ -1,18 +1,27 @@
+import 'dart:developer';
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Domain/Models/home_messages_model.dart';
+import 'package:flutter/material.dart';
+
+ import 'package:flutter/foundation.dart';
 
 class HomeMessagesRepository {
-  static Stream<List<HomeMessagesModel>> getHomeMessages() {
-    try {
- 
-      var messages = FirestoreServices.gethomeMessages();
+  static final HomeMessagesRepository _instance = HomeMessagesRepository._internal();
 
-  print('ainside mess');
-       print(messages);
-      return messages;
-    } catch (e) {
-      print('error in home messages repository');
-      throw e;
-    }
+  factory HomeMessagesRepository() {
+    return _instance;
+  }
+
+  HomeMessagesRepository._internal();
+
+  ValueNotifier<List<HomeMessagesModel>> homeMessageNotifier = ValueNotifier([]);
+
+  void getHomeMessages() {
+    
+
+    FirestoreServices().getHomeMessages().listen((event) {
+    log(event.length.toString()); 
+      homeMessageNotifier.value = event;
+    });
   }
 }

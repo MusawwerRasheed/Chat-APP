@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Domain/Models/home_messages_model.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quick_router/quick_router.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:rxdart/rxdart.dart';
 
 class FirestoreServices {
   static final currentUser = FirebaseAuth.instance.currentUser!;
@@ -47,113 +49,67 @@ class FirestoreServices {
     }
   }
 
-  
 
-  static Stream<List<HomeMessagesModel>> gethomeMessages() async* {
-    try {
-      String currentUid = FirebaseAuth.instance.currentUser!.uid;
+ Stream<List<HomeMessagesModel>> getHomeMessages() async* {
+  try {
+    final currentUid = FirebaseAuth.instance.currentUser!.uid;
 
-      QuerySnapshot chatroomsSnapshot = await FirebaseFirestore.instance
-          .collection('chatrooms')
-          .where('users', arrayContains: currentUid)
-          .get();
+    print('Fetching chatrooms for user: $currentUid');
+    final chatroomsSnapshot = FirebaseFirestore.instance
+        .collection('chatrooms')
+        .where('users', arrayContains: currentUid)
+        .snapshots();
 
-      Set<String> chatroomIds = {};
+    await for (final QuerySnapshot chatrooms in chatroomsSnapshot) {
+      print('Received ${chatrooms.docs.length} chatrooms');
 
-      chatroomsSnapshot.docs.forEach((doc) {
-        List<dynamic>? users = doc['users'];
+      final List<HomeMessagesModel> usersList = [];
 
-        if (users != null && users.isNotEmpty) {
-          String chatroomId = doc.id;
-          chatroomIds.add(chatroomId);
-        }
-      });
+      if (chatrooms.docs.isEmpty) {
+        print('No chatrooms found for user: $currentUid');
+        yield usersList;
+        continue;
+      }
 
-      List<HomeMessagesModel> usersList = []; // List to accumulate users
+      for (final QueryDocumentSnapshot doc in chatrooms.docs) {
+        final String chatroomId = doc.id;
+        print('Processing chatroom: $chatroomId');
 
-      for (String chatroomId in chatroomIds) {
-        print('Fetching latest message for chatroom ID: $chatroomId');
-
-        QuerySnapshot messagesQuerySnapshot = await FirebaseFirestore.instance
+        final messageQuery = FirebaseFirestore.instance
             .collection('messages')
             .where('chatroomId', isEqualTo: chatroomId)
             .orderBy('timestamp', descending: true)
-            .get();
+            .limit(1);
 
-        if (messagesQuerySnapshot.docs.isNotEmpty) {
-          var messageDocs = messagesQuerySnapshot.docs;
-          var lastMessage = messageDocs.first.data() as Map<String, dynamic>;
+        final messageSnapshot = await messageQuery.get();
+        print('Message snapshot: $messageSnapshot');
 
-          String senderId = lastMessage['senderId'];
-          String type = lastMessage['type'];
-          String text =
-              lastMessage['text'] ?? 'No messages yet'; // Default message
-          Timestamp timestamp = lastMessage['timestamp'];
-          bool seen = lastMessage['seen'] ?? false;
+        if (messageSnapshot.docs.isNotEmpty) {
+          final lastMessageDoc = messageSnapshot.docs.first;
+          print('Last message document: $lastMessageDoc');
 
-          int count = messageDocs.where((doc) => doc['seen'] == false).length;
+          // Extract and process the last message
+          final lastMessageData = lastMessageDoc.data();
+          print('Last message data: $lastMessageData');
 
-          String otherUserId;
-          if (chatroomId.contains('_')) {
-            List<String> ids = chatroomId.split('_');
-            if (ids.length == 2 && ids.contains(currentUid)) {
-              otherUserId =
-                  ids.firstWhere((id) => id != currentUid, orElse: () => '');
-            } else {
-              otherUserId = senderId;
-            }
-          } else {
-            otherUserId = senderId;
-          }
-
-          if (otherUserId.isNotEmpty) {
-            var userDoc = await FirebaseFirestore.instance
-                .collection('users')
-                .doc(otherUserId)
-                .get();
-
-            if (userDoc.exists) {
-              var userData = userDoc.data() as Map<String, dynamic>;
-
-              HomeMessagesModel user = HomeMessagesModel(
-                displayName: userData['displayName'],
-                email: userData['email'],
-                imageUrl: userData['imageUrl'],
-                uid: userData['uid'],
-                isTyping: userData['isTyping'] ?? false,
-                isOnline: userData['isOnline'] ?? false,
-                lastSeen: userData['lastSeen'],
-                seen: seen,
-                senderId: senderId,
-                chatroomId: chatroomId,
-                type: type,
-                lastMessage: text,
-                timestamp: timestamp,
-                latestMessageType: type,
-                count: count,
-              );
-
-              print('Sender ID: $senderId');
-              print('Type: $type');
-              print('Last Message: $text');
-              print('Timestamp: $timestamp');
-              print('Seen: $seen');
-              print('Count: $count');
-              print('Created User: $user');
-
-              usersList.add(user);
-            }
-          }
+          final lastMessage = HomeMessagesModel.fromJson(lastMessageData);
+          usersList.add(lastMessage);
+          print('Added last message to usersList');
+        } else {
+          print('No messages found in chatroom: $chatroomId');
         }
       }
-      print(usersList);
-      yield usersList;  
-    } catch (e) {
-      print('Error getting chat users: $e');
-      throw e;
+
+      print('Yielding ${usersList.length} HomeMessagesModels');
+      yield usersList;
     }
+  } catch (e, stackTrace) {
+    print('Error getting chat users: $e');
+    print('Stack trace: $stackTrace');
+    throw e;
   }
- 
+}
+
 
 
   // static Future<List<HomeMessagesModel>> gethomeMessages() async {

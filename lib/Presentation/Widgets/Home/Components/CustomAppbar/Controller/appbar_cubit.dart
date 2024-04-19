@@ -1,5 +1,5 @@
 import 'package:chat_app/Data/Repository/ChatRepository/AppbarDataRepository/appbar_data_repository.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/CustomAppbar/Controller/appbar_states.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/CustomAppbar/Controller/appbar_states.dart'; 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppbarCubit extends Cubit<AppbarState> {

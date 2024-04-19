@@ -12,7 +12,7 @@ class HomeMessagesModel {
   final String? chatroomId;
   final String? senderId;
   final String? text;
-  final String? chatUid;
+  final String? chatUid; 
   final String? type;
   final bool? seen;
   final int? count;
@@ -51,20 +51,22 @@ class HomeMessagesModel {
         email: json["email"],
         imageUrl: json["imageUrl"],
         uid: json["uid"],
-        isTyping: json["isTyping"],
-        isOnline: json["isOnline"],
+        isTyping: json["isTyping"] ?? false,
+        isOnline: json["isOnline"] ??false,
         lastSeen: json["lastSeen"],
         chatroomId: json["chatroomId"],
-        senderId: json["senderId"],
-        text: json["text"],
+        senderId: json["senderId"]??'adfas323',
+        text: json["text"]??'no message yet',
         chatUid: json["chatUid"],
-        type: json["type"],
-        seen: json['seen'],
-        count: json['count'],
-        lastMessage: json['lastMessage'],
-        latestMessageType: json['lastMessageType'],
-        timestamp: json["timestamp"],
+        type: json["type"]??'text',
+        seen: json['seen']??false,
+        count: json['count']??3,
+        lastMessage: json['lastMessage']??'xxx',
+        latestMessageType: json['type']??'text',
+        timestamp: json["timestamp"]??Timestamp.now(),
       );
+
+       
 
   Map<String, dynamic> toJson() => {
         "displayName": displayName,

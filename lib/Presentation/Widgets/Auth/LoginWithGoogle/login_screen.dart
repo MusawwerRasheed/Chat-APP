@@ -4,10 +4,9 @@ import 'package:chat_app/Presentation/Common/custom_image.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/Controller/login_cubit.dart';
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithGoogle/Controller/login_state.dart';
-
 import 'package:chat_app/Presentation/Widgets/Auth/LoginWithemail/Login_with_email_screen.dart';
-import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_screen.dart'; 
-import 'package:chat_app/Presentation/Widgets/Chat/Home/home.dart';
+import 'package:chat_app/Presentation/Widgets/Auth/RegisterWIthEmail/register_with_email_screen.dart';
+import 'package:chat_app/Presentation/Widgets/Home/home.dart';  
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

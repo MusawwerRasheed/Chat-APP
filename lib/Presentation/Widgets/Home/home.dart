@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:chat_app/Application/Services/AppLifeCycleObserver/app_life_cycles.dart';
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/color.dart';
@@ -8,11 +9,11 @@ import 'package:chat_app/Domain/Models/home_messages_model.dart';
 import 'package:chat_app/Presentation/Common/custom_image.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
 import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/OnlineStatus/online_status_lastseen_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/messages_list_tile.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Components/custom_image_avatar.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/Users/Controller/users_cubit.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/Users/Controller/users_state.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/UsersSearchBar/Controller/Users/Controller/users_cubit.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/UsersSearchBar/Controller/Users/Controller/users_state.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/custom_image_avatar.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/messages_list_tile.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Controller/home_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,28 +32,18 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  ValueNotifier<List<HomeMessagesModel>> homeMessageNotifier =
-      ValueNotifier([]);
   late final User? currentUser;
   late final ValueNotifier<String> searchValueNotifier;
   late final TextEditingController userSearchController;
 
-  void initHomeMessagesStream() async {
-    try {
-      Stream<List<HomeMessagesModel>> homeMessagesStream =
-          HomeMessagesRepository.getHomeMessages();
-      homeMessagesStream.listen((homeMessages) {
-        homeMessageNotifier.value = homeMessages;
-      });
-    } catch (e) {
-      print('Error initializing chat stream: $e');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    initHomeMessagesStream();
+
+    HomeMessagesRepository().getHomeMessages();
+
+log('>>>>1'); 
+    log(HomeMessagesRepository().homeMessageNotifier.value.length.toString());
 
     AppLifecycleObserver appLifecycleObserver =
         AppLifecycleObserver(context: context);
@@ -90,7 +81,6 @@ class _HomeState extends State<Home> {
             context
                 .read<OnlineStatusCubit>()
                 .updateOlineStatusLastSeen(false, Timestamp.now());
-
             HomeController().signOut(context);
             break;
         }
@@ -104,7 +94,7 @@ class _HomeState extends State<Home> {
       backgroundColor: AppColors.white,
       body: Column(
         children: [
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -225,167 +215,187 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     ValueListenableBuilder<List<HomeMessagesModel>>(
-                      valueListenable: homeMessageNotifier,
+                      valueListenable:
+                          HomeMessagesRepository().homeMessageNotifier,
                       builder: (context, homeMessages, _) {
+                        print('sdfasd');
+                        print(homeMessages.length.toString());
                         if (homeMessages.isEmpty) {
                           return Center(
-                              child: CustomText(customText: 'No Messages Yet'));
+                            child: CustomText(customText: 'No Messages Yet'),
+                          );
                         }
 
-                        return Container(
-                          height: 500,
-                          child: ListView.separated(
-                            itemBuilder: (context, index) {
-                              HomeMessagesModel homeMessage =
-                                  homeMessages[index];
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  HomeMessagesModel homeMessage =
+                                      homeMessages[index];
+                                  bool isCurrentUserMessage = homeMessage
+                                          .senderId ==
+                                      FirebaseAuth.instance.currentUser!.uid;
 
-                              return GestureDetector(
-                                onTap: () {
-                                  FirestoreServices().checkChatroom(
-                                    context,
-                                    FirebaseAuth.instance.currentUser!.uid,
-                                    homeMessage.uid!,
-                                  );
-                                },
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: AppColors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            offset: Offset.fromDirection(9, 0),
-                                            spreadRadius: 0.1,
-                                            blurRadius: 1,
-                                            color: AppColors.grey,
+                                  return GestureDetector(
+                                    onTap: () {
+                                      FirestoreServices().checkChatroom(
+                                        context,
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                        homeMessage.uid!,
+                                      );
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: AppColors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                offset:
+                                                    Offset.fromDirection(9, 0),
+                                                spreadRadius: 0.1,
+                                                blurRadius: 1,
+                                                color: AppColors.grey,
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                      height: 80,
-                                      width: 330,
-                                      child: MessagesListTile(
-                                        leading: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: CustomImageAvatar(
-                                            imagePath: homeMessage.imageUrl,
-                                            isAssetImage: false,
-                                            isForSearch: false,
-                                          ),
-                                        ),
-                                        title: Row(
-                                          children: [
-                                            CustomText(
-                                              textStyle: Styles.plusJakartaBold(
-                                                context,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                              customText:
-                                                  homeMessage.displayName!,
-                                            ),
-                                            7.x,
-                                            if (homeMessage.isOnline == true)
-
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(50),
-                                                child: Container(
-                                                  height: 10,
-                                                  width: 10,
-                                                  color: Colors.green[300],
-                                                ),
-                                              )
-                                            else
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(40),
-                                                child: Container(
-                                                  height: 10,
-                                                  width: 10,
-                                                  color: AppColors.grey,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                        subTitle: Row(
-                                          children: [
-                                            Visibility(
-                                              visible: homeMessage.senderId ==
-                                                  FirebaseAuth.instance
-                                                      .currentUser!.uid,
-                                              child: Icon(
-                                                Icons.done_all_rounded,
-                                                color: homeMessage.seen == true
-                                                    ? AppColors.blue
-                                                    : AppColors.grey,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            SizedBox(
-                                              width: 120,
-                                              child: CustomText(
-                                                overflow: TextOverflow.ellipsis,
-                                                customText: homeMessage
-                                                            .latestMessageType ==
-                                                        'text'
-                                                    ? homeMessage.lastMessage ??
-                                                        'asd'
-                                                    : 'image',
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        trailing: Column(
-                                          children: [
-                                            CustomText(
-                                              customText: HomeController
-                                                      .formatMessageSend(
-                                                    homeMessage.timestamp ??
-                                                        Timestamp.now(),
-                                                  ) ??
-                                                  '',
-                                            ),
-                                            const SizedBox(height: 10),
-                                            ClipRRect(
+                                          height: 80,
+                                          width: 330,
+                                          child: MessagesListTile(
+                                            leading: ClipRRect(
                                               borderRadius:
-                                                  BorderRadius.circular(50),
-                                              child: Visibility(
-                                                visible: false,
-                                                child: Container(
-                                                  child: Center(
-                                                    child: CustomText(
-                                                      customText: '2',
-                                                      textStyle: Styles
-                                                          .largePlusJakartaSans(
-                                                        context,
-                                                        color: AppColors.white,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 15,
-                                                      ),
+                                                  BorderRadius.circular(10),
+                                              child: CustomImageAvatar(
+                                                imagePath: homeMessage.imageUrl,
+                                                isAssetImage: false,
+                                                isForSearch: false,
+                                              ),
+                                            ),
+                                            title: Row(
+                                              children: [
+                                                CustomText(
+                                                  textStyle:
+                                                      Styles.plusJakartaBold(
+                                                    context,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                  customText:
+                                                      homeMessage.displayName!,
+                                                ),
+                                                SizedBox(width: 7),
+                                                if (homeMessage.isOnline ==
+                                                    true)
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            50),
+                                                    child: Container(
+                                                      height: 10,
+                                                      width: 10,
+                                                      color: Colors.green[300],
+                                                    ),
+                                                  )
+                                                else
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            40),
+                                                    child: Container(
+                                                      height: 10,
+                                                      width: 10,
+                                                      color: AppColors.grey,
                                                     ),
                                                   ),
-                                                  height: 20,
-                                                  width: 20,
-                                                  color: Colors.blueAccent,
-                                                ),
-                                              ),
+                                              ],
                                             ),
-                                          ],
+                                            subTitle: Row(
+                                              children: [
+                                                Visibility(
+                                                  visible: isCurrentUserMessage,
+                                                  child: Icon(
+                                                    Icons.done_all_rounded,
+                                                    color:
+                                                        homeMessage.seen == true
+                                                            ? AppColors.blue
+                                                            : AppColors.grey,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 10),
+                                                SizedBox(
+                                                  width: 120,
+                                                  child: CustomText(
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    customText: homeMessage
+                                                                .latestMessageType ==
+                                                            'text'
+                                                        ? homeMessage
+                                                                .lastMessage ??
+                                                            'asd'
+                                                        : 'image',
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            trailing: Column(
+                                              children: [
+                                                CustomText(
+                                                  customText: HomeController
+                                                          .formatMessageSend(
+                                                        homeMessage.timestamp ??
+                                                            Timestamp.now(),
+                                                      ) ??
+                                                      '',
+                                                ),
+                                                SizedBox(height: 10),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(50),
+                                                  child: Visibility(
+                                                    visible:
+                                                        false, // Replace with your logic
+                                                    child: Container(
+                                                      child: Center(
+                                                        child: CustomText(
+                                                          customText: '2',
+                                                          textStyle: Styles
+                                                              .largePlusJakartaSans(
+                                                            context,
+                                                            color:
+                                                                AppColors.white,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 15,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      height: 20,
+                                                      width: 20,
+                                                      color: Colors.blueAccent,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              );
-                            },
-                            separatorBuilder:
-                                (BuildContext context, int index) {
-                              return const SizedBox(height: 20);
-                            },
-                            itemCount: homeMessages.length,
+                                  );
+                                },
+                                separatorBuilder:
+                                    (BuildContext context, int index) {
+                                  return SizedBox(height: 20);
+                                },
+                                itemCount: homeMessages.length,
+                              ),
+                            ],
                           ),
                         );
                       },

@@ -1,6 +1,6 @@
 import 'package:chat_app/Data/Repository/UsersRepository/users_repository.dart';
 import 'package:chat_app/Domain/Models/users_model.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/ChatScreen/Controller/Users/Controller/users_state.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Components/UsersSearchBar/Controller/Users/Controller/users_state.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

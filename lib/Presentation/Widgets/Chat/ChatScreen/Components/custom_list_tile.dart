@@ -3,7 +3,7 @@ import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
 import 'package:chat_app/Data/DataSource/Resources/styles.dart';
 import 'package:chat_app/Domain/Models/chat_model.dart';
 import 'package:chat_app/Presentation/Common/custom_text.dart';
-import 'package:chat_app/Presentation/Widgets/Chat/Home/Controller/home_controller.dart';
+import 'package:chat_app/Presentation/Widgets/Home/Controller/home_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
