@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat_app/Application/Services/FirestoreServices/firestore_services.dart';
 import 'package:chat_app/Data/DataSource/Resources/extensions.dart';
@@ -257,6 +258,7 @@ class ChatScreenState extends State<ChatScreen> {
                 child: ValueListenableBuilder<List<ChatModel>>(
                   valueListenable: chatMessagesNotifier,
                   builder: (context, chatMessages, _) {
+                   
                     return ListView.builder(
                       controller: scrollController,
                       reverse: true,

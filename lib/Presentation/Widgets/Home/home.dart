@@ -35,15 +35,12 @@ class _HomeState extends State<Home> {
   late final User? currentUser;
   late final ValueNotifier<String> searchValueNotifier;
   late final TextEditingController userSearchController;
+  HomeMessagesRepository homeMessasges = HomeMessagesRepository();
 
   @override
   void initState() {
     super.initState();
-
-    HomeMessagesRepository().getHomeMessages();
-
-log('>>>>1'); 
-    log(HomeMessagesRepository().homeMessageNotifier.value.length.toString());
+    homeMessasges.getHomeMessages();
 
     AppLifecycleObserver appLifecycleObserver =
         AppLifecycleObserver(context: context);
@@ -215,11 +212,8 @@ log('>>>>1');
                       ),
                     ),
                     ValueListenableBuilder<List<HomeMessagesModel>>(
-                      valueListenable:
-                          HomeMessagesRepository().homeMessageNotifier,
+                      valueListenable: homeMessasges.homeMessageNotifier,
                       builder: (context, homeMessages, _) {
-                        print('sdfasd');
-                        print(homeMessages.length.toString());
                         if (homeMessages.isEmpty) {
                           return Center(
                             child: CustomText(customText: 'No Messages Yet'),
@@ -234,7 +228,24 @@ log('>>>>1');
                                 physics: NeverScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
                                   HomeMessagesModel homeMessage =
-                                      homeMessages[index];
+                                      homeMessages[index]; 
+                                      
+                                      // log(homeMessage.count.toString()+ '    '+'count');
+                                      // log(homeMessage.isOnline.toString()+ '    '+'isOnline');
+                                      // log(homeMessage.isTyping.toString()+ '    '+'istyping');
+                                      // log(homeMessage.seen.toString()+ '    '+'seen');
+                                      // log(homeMessage.timestamp.toString()+ '    '+'time stamp');
+                                      // log(homeMessage.chatUid.toString()+ '    '+'chatuid');
+                                      // log(homeMessage.chatroomId.toString()+ '    '+'chatroomId');
+                                      // log(homeMessage.displayName.toString()+ '    '+'displayName');
+                                      // log(homeMessage.email.toString()+ '    '+'email');
+                                      // log(homeMessage.lastMessage.toString()+ '    '+' last message');
+                                      // log(homeMessage.latestMessageType.toString()+ '    '+'latest message type');
+                                      // log(homeMessage.senderId.toString()+ '    '+'sender id');
+                                      // log(homeMessage.text.toString()+ '    '+'text');
+                                      // log(homeMessage.type.toString()+ '    '+'type');
+                                      // log(homeMessage.uid.toString()+ '    '+'uid');
+                                      
                                   bool isCurrentUserMessage = homeMessage
                                           .senderId ==
                                       FirebaseAuth.instance.currentUser!.uid;
@@ -330,16 +341,10 @@ log('>>>>1');
                                                 SizedBox(
                                                   width: 120,
                                                   child: CustomText(
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    customText: homeMessage
-                                                                .latestMessageType ==
-                                                            'text'
-                                                        ? homeMessage
-                                                                .lastMessage ??
-                                                            'asd'
-                                                        : 'image',
-                                                  ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      customText:
+                                                          homeMessage.text!),
                                                 ),
                                               ],
                                             ),
@@ -415,5 +420,6 @@ log('>>>>1');
     super.dispose();
     searchValueNotifier.dispose();
     userSearchController.dispose();
+    homeMessasges.homeMessageNotifier.dispose();
   }
 }

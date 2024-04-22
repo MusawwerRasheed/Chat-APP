@@ -5,12 +5,7 @@ class IsTypingRepository {
 
   Future updateTypingStatus(String userId, bool istyping) {
     try {
-      //
-      // Debouncer(milliseconds: 500 ).run(() {
-      //
-      //
-      //
-      // });
+ 
       return FirestoreServices().updateTypingStatus(userId, istyping);
     } catch (e) {
       print('Error in istyping repository   $e');

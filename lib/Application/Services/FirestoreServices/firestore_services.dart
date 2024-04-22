@@ -11,8 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quick_router/quick_router.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:rxdart/rxdart.dart';
+import 'package:logger/logger.dart';
 
 class FirestoreServices {
+  static HomeMessagesModel homeMessage = HomeMessagesModel();
   static final currentUser = FirebaseAuth.instance.currentUser!;
   static Future<QuerySnapshot<Map<String, dynamic>>> globalchatroomsSnapshot =
       FirebaseFirestore.instance.collection('chatrooms').get();
@@ -49,171 +51,64 @@ class FirestoreServices {
     }
   }
 
+  // static Stream chatroomsStream() async* {
+  //   List<String> chatroomidswith_ = [];
+  //   List<String> chatroomids = [];
+  //   List<String> otherUsersids = [];
+  //   String currentUser = FirebaseAuth.instance.currentUser!.uid;
 
- Stream<List<HomeMessagesModel>> getHomeMessages() async* {
-  try {
-    final currentUid = FirebaseAuth.instance.currentUser!.uid;
-
-    print('Fetching chatrooms for user: $currentUid');
-    final chatroomsSnapshot = FirebaseFirestore.instance
-        .collection('chatrooms')
-        .where('users', arrayContains: currentUid)
-        .snapshots();
-
-    await for (final QuerySnapshot chatrooms in chatroomsSnapshot) {
-      print('Received ${chatrooms.docs.length} chatrooms');
-
-      final List<HomeMessagesModel> usersList = [];
-
-      if (chatrooms.docs.isEmpty) {
-        print('No chatrooms found for user: $currentUid');
-        yield usersList;
-        continue;
-      }
-
-      for (final QueryDocumentSnapshot doc in chatrooms.docs) {
-        final String chatroomId = doc.id;
-        print('Processing chatroom: $chatroomId');
-
-        final messageQuery = FirebaseFirestore.instance
-            .collection('messages')
-            .where('chatroomId', isEqualTo: chatroomId)
-            .orderBy('timestamp', descending: true)
-            .limit(1);
-
-        final messageSnapshot = await messageQuery.get();
-        print('Message snapshot: $messageSnapshot');
-
-        if (messageSnapshot.docs.isNotEmpty) {
-          final lastMessageDoc = messageSnapshot.docs.first;
-          print('Last message document: $lastMessageDoc');
-
-          // Extract and process the last message
-          final lastMessageData = lastMessageDoc.data();
-          print('Last message data: $lastMessageData');
-
-          final lastMessage = HomeMessagesModel.fromJson(lastMessageData);
-          usersList.add(lastMessage);
-          print('Added last message to usersList');
-        } else {
-          print('No messages found in chatroom: $chatroomId');
-        }
-      }
-
-      print('Yielding ${usersList.length} HomeMessagesModels');
-      yield usersList;
-    }
-  } catch (e, stackTrace) {
-    print('Error getting chat users: $e');
-    print('Stack trace: $stackTrace');
-    throw e;
-  }
-}
-
-
-
-  // static Future<List<HomeMessagesModel>> gethomeMessages() async {
   //   try {
-  //     String currentUid = FirebaseAuth.instance.currentUser!.uid;
-
-  //     QuerySnapshot chatroomsSnapshot = await FirebaseFirestore.instance
+  //     final chatrooms = FirebaseFirestore.instance
   //         .collection('chatrooms')
-  //         .where('users', arrayContains: currentUid)
-  //         .get();
+  //         .where('users', arrayContains: currentUser)
+  //         .snapshots();
 
-  //     Set<String> chatroomIds = {}; // Using a set to store unique chatroomIds
+  //     await for (final chatroom in chatrooms) {
+  //       for (final doc in chatroom.docs) {
+  //         chatroomidswith_.add(doc.id);
+  //       }
 
-  //     chatroomsSnapshot.docs.forEach((doc) {
-  //       List<dynamic>? users = doc['users'];
+  //       for (String chatroomid in chatroomidswith_) {
+  //         List<String> chatroomstemp = chatroomid.split('_');
+  //         chatroomids.addAll(chatroomstemp);
+  //       }
 
-  //       if (users != null && users.isNotEmpty) {
-  //         String chatroomId = doc.id;
-  //         chatroomIds.add(chatroomId);
+  //       otherUsersids.addAll(chatroomids);
+  //       otherUsersids.removeWhere((element) => element == currentUser);
+
+  //       yield otherUsersids;
+  //       // yield chatroomidswith_;
+  //     }
+  //   } catch (e) {
+  //     print('error occured in chatrooms stream:  $e');
+  //     throw e;
+  //   }
+  // }
+
+  // static Stream usersDataStream() async* {
+  //   try {
+  //     List<String> otherUsers = [];
+  //     List<HomeMessagesModel> homeMessagesList = [];
+  //     List<Map<String, dynamic>> usersDataList = [];
+
+  //     chatroomsStream().listen((event) async {
+  //       otherUsers.addAll(event);
+
+  //       final otherUsersSnaps = FirebaseFirestore.instance
+  //           .collection('users')
+  //           .where(FieldPath.documentId, whereIn: otherUsers)
+  //           .snapshots();
+
+  //       await for (final userdocs in otherUsersSnaps) {
+  //         for (final user in userdocs.docs) {
+  //           usersDataList.add(user.data());
+
+  //           log(usersDataList.toString());
+  //         }
   //       }
   //     });
-
-  //     List<HomeMessagesModel> users = [];
-
-  //     for (String chatroomId in chatroomIds) {
-  //       print('Fetching latest message for chatroom ID: $chatroomId');
-
-  //       QuerySnapshot messagesQuerySnapshot = await FirebaseFirestore.instance
-  //           .collection('messages')
-  //           .where('chatroomId', isEqualTo: chatroomId)
-  //           .orderBy('timestamp', descending: true)
-  //           .limit(1)
-  //           .get();
-
-  //       if (messagesQuerySnapshot.docs.isNotEmpty) {
-  //         var messageDoc = messagesQuerySnapshot.docs.first;
-  //         var messageData = messageDoc.data() as Map<String, dynamic>;
-
-  //         String senderId = messageData['senderId'];
-  //         String type = messageData['type'];
-  //         String lastMessage =
-  //             messageData['text'] ?? 'No messages yet'; // Default message
-  //         Timestamp timestamp = messageData['timestamp'];
-  //         bool seen = messageData['seen'] ?? false;
-
-  //         String otherUserId;
-  //         if (chatroomId.contains('_')) {
-  //           List<String> ids = chatroomId.split('_');
-  //           if (ids.length == 2 && ids.contains(currentUid)) {
-  //             otherUserId =
-  //                 ids.firstWhere((id) => id != currentUid, orElse: () => '');
-  //           } else {
-  //             otherUserId = senderId;
-  //           }
-  //         } else {
-  //           otherUserId = senderId;
-  //         }
-
-  //         if (otherUserId.isNotEmpty) {
-  //           print('Other User ID: $otherUserId');
-  //           print('Current User ID: $currentUid');
-
-  //           var userDoc = await FirebaseFirestore.instance
-  //               .collection('users')
-  //               .doc(otherUserId)
-  //               .get();
-
-  //           if (userDoc.exists) {
-  //             var userData = userDoc.data() as Map<String, dynamic>;
-
-  //             HomeMessagesModel user = HomeMessagesModel(
-  //               displayName: userData['displayName'],
-  //               email: userData['email'],
-  //               imageUrl: userData['imageUrl'],
-  //               uid: userData['uid'],
-  //               isTyping: userData['isTyping'] ?? false,
-  //               isOnline: userData['isOnline'] ?? false,
-  //               lastSeen: userData['lastSeen'],
-  //               seen: seen,
-  //               senderId: senderId,
-  //               chatroomId: chatroomId,
-  //               type: type,
-  //               lastMessage: lastMessage,
-  //               timestamp: timestamp,
-  //               latestMessageType: type,
-  //             );
-
-  //             print('Sender ID: $senderId');
-  //             print('Type: $type');
-  //             print('Last Message: $lastMessage');
-  //             print('Timestamp: $timestamp');
-  //             print('Seen: $seen');
-  //             print('Created User: $user');
-
-  //             users.add(user);
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     return users;
   //   } catch (e) {
-  //     print('Error getting chat users: $e');
-  //     throw e;
+  //     log(e.toString() + "error in stream of Users data ");
   //   }
   // }
 
@@ -332,7 +227,6 @@ class FirestoreServices {
           (imagePaths != null && imagePaths.isNotEmpty) ? 'image' : 'text';
 
       if (isStreamEmpty ?? false) {
-        // print('Stream is empty, creating new chat room...');
         String chatroomId = await createChatRoom(
           FirebaseAuth.instance.currentUser!.uid,
           otherUserId!,
@@ -352,7 +246,11 @@ class FirestoreServices {
         String finalMessage = _constructMessageText(textMessage, imageUrls);
         print('Final Message: $finalMessage');
 
-        FirebaseFirestore.instance.collection('messages').add(
+        FirebaseFirestore.instance
+            .collection('chatrooms')
+            .doc(chatRoomId)
+            .collection('chats')
+            .add(
               ChatModel(
                 chatroomId: chatroomId,
                 senderId: FirebaseAuth.instance.currentUser!.uid,
@@ -363,6 +261,22 @@ class FirestoreServices {
                 uid: otherUserId,
               ).toJson(),
             );
+
+        await FirebaseFirestore.instance
+            .collection('chatrooms')
+            .doc(chatRoomId)
+            .set({
+          'lastMessage': ChatModel(
+            chatroomId: chatroomId,
+            senderId: FirebaseAuth.instance.currentUser!.uid,
+            text: finalMessage,
+            type: messageType,
+            timestamp: null,
+            seen: false,
+            uid: otherUserId,
+          ).toJson(),
+        }, SetOptions(merge: true));
+
         print('Message sent to new chat room.');
       } else {
         print('Stream is not empty, sending message to existing chat room...');
@@ -378,7 +292,11 @@ class FirestoreServices {
 
         String finalMessage = _constructMessageText(textMessage, imageUrls);
 
-        FirebaseFirestore.instance.collection('messages').add(
+        FirebaseFirestore.instance
+            .collection('chatrooms')
+            .doc(chatRoomId)
+            .collection('chats')
+            .add(
               ChatModel(
                 chatroomId: chatRoomId,
                 senderId: FirebaseAuth.instance.currentUser!.uid,
@@ -389,6 +307,21 @@ class FirestoreServices {
                 uid: otherUserId,
               ).toJson(),
             );
+
+        await FirebaseFirestore.instance
+            .collection('chatrooms')
+            .doc(chatRoomId)
+            .set({
+          'lastMessage': ChatModel(
+            chatroomId: chatRoomId,
+            senderId: FirebaseAuth.instance.currentUser!.uid,
+            text: finalMessage,
+            type: messageType,
+            timestamp: null,
+            seen: false,
+            uid: otherUserId,
+          ).toJson(),
+        }, SetOptions(merge: true));
         print('Message sent to existing chat room.');
       }
     } catch (e) {
@@ -410,15 +343,12 @@ class FirestoreServices {
             .ref()
             .child('images/$fileName.jpg');
 
-        // Add the upload task to the list
         firebase_storage.UploadTask uploadTask = reference.putFile(imageFile);
         uploadTasks.add(uploadTask);
       }
 
-      // Wait for all uploads to complete
       await Future.wait(uploadTasks);
 
-      // Get download URLs for uploaded images
       for (firebase_storage.UploadTask task in uploadTasks) {
         firebase_storage.TaskSnapshot snapshot = await task;
         String imageUrl = await snapshot.ref.getDownloadURL();
@@ -443,43 +373,6 @@ class FirestoreServices {
     print(finalMessage);
     return finalMessage;
   }
-
-  // Future<void> sendMessage({String? chatRoomId, String? messageText,
-  //     String? otherUserId, BuildContext? context, bool? isStreamEmpty, List<String>? imagespaths} ) async {
-  //   try {
-  //     if (isStreamEmpty!) {
-  //       print('Stream is empty, creating new chat room...');
-  //       String chatroomid = await createChatRoom(
-  //           FirebaseAuth.instance.currentUser!.uid, otherUserId!);
-  //       print('New chatroom created with ID: $chatroomid');
-
-  //       FirebaseFirestore.instance.collection('messages').add(
-  //             ChatModel(
-  //               chatroomId: chatroomid,
-  //               senderId: FirebaseAuth.instance.currentUser!.uid,
-  //               text: messageText,
-  //               timestamp: DateTime.now(),
-  //               uid: otherUserId,
-  //             ).toJson(),
-  //           );
-  //       print('Message sent to new chat room.');
-  //     } else {
-  //       print('Stream is not empty, sending message to existing chat room...');
-  //       FirebaseFirestore.instance.collection('messages').add(
-  //             ChatModel(
-  //               chatroomId: chatRoomId,
-  //               senderId: FirebaseAuth.instance.currentUser!.uid,
-  //               text: messageText,
-  //               timestamp: DateTime.now(),
-  //               uid: otherUserId,
-  //             ).toJson(),
-  //           );
-  //       print('Message sent to existing chat room.');
-  //     }
-  //   } catch (e) {
-  //     print("Error sending message: $e");
-  //   }
-  // }
 
   Future<void> updateOnlineLastSeen(
       bool onlineStatus, Timestamp lastSeen) async {
@@ -529,7 +422,7 @@ class FirestoreServices {
         print('Failed to update isTyping status: $error');
       });
     } catch (e) {
-      print('<><><> ERROR <><><><>< inside is typing');
+      print('<><><><> ERROR <><><><>< inside is typing');
       throw e;
     }
   }
@@ -624,10 +517,12 @@ class FirestoreServices {
 
   Stream<List<ChatModel>> getChat(String chatRoomId) async* {
     try {
+      log('in get chat service $chatRoomId');
       final Stream<QuerySnapshot<Map<String, dynamic>>> chatsStream =
           FirebaseFirestore.instance
-              .collection('messages')
-              .where('chatroomId', isEqualTo: chatRoomId)
+              .collection('chatrooms')
+              .doc(chatRoomId)
+              .collection('chats')
               .orderBy('timestamp', descending: true)
               .snapshots();
 
@@ -636,6 +531,7 @@ class FirestoreServices {
         List<ChatModel> chats = chatSnapshot.docs.map((doc) {
           Map<String, dynamic> data = doc.data();
 
+          log('this executes');
           dynamic timestamp = data['timestamp'];
           if (timestamp is Timestamp) {
             timestamp = timestamp.toDate();
@@ -644,6 +540,7 @@ class FirestoreServices {
           } else {}
           return ChatModel.fromJson(data..['timestamp']);
         }).toList();
+        log(chats.length.toString());
         yield chats;
       }
     } catch (e) {
@@ -651,7 +548,75 @@ class FirestoreServices {
       throw e;
     }
   }
+
+  static Stream<List<HomeMessagesModel>> homeMessagesStream() {
+    log('inside the homemessagestream');
+
+    final currentUser = FirebaseAuth.instance.currentUser!.uid;
+
+    
+    final chatroomsSnapshots = FirebaseFirestore.instance
+        .collection('chatrooms')
+        .where("users", arrayContains: currentUser)
+        .snapshots();
+  
+    // final usersSnapshots = FirebaseFirestore.instance
+    //     .collection('users')
+    //     .where('uid', isNotEqualTo: currentUser)
+    //     .snapshots();
+    final usersSnapshots  = FirebaseFirestore.instance.collection('users').snapshots();
+    
+    return Rx.combineLatest2<QuerySnapshot<Map<String, dynamic>>,
+        QuerySnapshot<Map<String, dynamic>>, List<HomeMessagesModel>>(
+      chatroomsSnapshots,
+      usersSnapshots,
+      (QuerySnapshot<Map<String, dynamic>> chatroomsSnap,
+          QuerySnapshot<Map<String, dynamic>> usersSnap) {
+        final List<HomeMessagesModel> homeMessages = [];
+
+        for (final doc in chatroomsSnap.docs) {
+          final lastMessageData =
+              doc.data()['lastMessage'] as Map<String, dynamic>?;
+
+          if (lastMessageData != null) {
+            final lastMessageText = lastMessageData['text'] ?? '';
+            final lastMessageSeen = lastMessageData['seen'] ?? false;
+            final lastMessageTimestamp =
+                lastMessageData['timestamp'] ?? Timestamp.now();
+            final otherUserId = lastMessageData['uid'];
+            final lastMessageType = lastMessageData['type'];
+            final chatroomId = lastMessageData['chatroomId'];
+            final userData = usersSnap.docs
+                .firstWhere((userDoc) => userDoc.id == otherUserId);
+            if (userData != null) {
+              final displayName = userData['displayName'] ?? '';
+              final imageUrl = userData['imageUrl'] ?? '';
+              final isOnline = userData['isOnline'] ?? true;
+              log(displayName);
+
+              homeMessages.add(HomeMessagesModel(
+                text: lastMessageText,
+                seen: lastMessageSeen,
+                timestamp: lastMessageTimestamp,
+                displayName: displayName,
+                imageUrl: imageUrl,
+                isOnline: isOnline,
+                uid: otherUserId,
+                chatroomId: chatroomId,
+              ));
+            }
+          }
+        } 
+
+    log('execution');
+    return homeMessages;
+
+      },
+    );
+  }
 }
+
+//todo
 
 class Debouncer {
   final int milliseconds;
